@@ -1,6 +1,7 @@
  <?php
 if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); }
 include '../../db.php';
+require_once __DIR__ . '/payment_allocator.php';
 
 header('Content-Type: application/json');
 
@@ -15,7 +16,7 @@ if ($_POST) {
         }
         
         // Get payment details before cancellation
-        $payment_sql = "SELECT lp.*, l.lease_number,l.file_number ,l.beneficiary_id
+        $payment_sql = "SELECT lp.*, l.lease_number,l.file_number ,l.beneficiary_id, l.lease_type_id
                        FROM lease_payments lp 
                        LEFT JOIN leases l ON lp.lease_id = l.lease_id 
                        WHERE lp.payment_id = ?";
@@ -40,6 +41,16 @@ if ($_POST) {
             throw new Exception("Failed to cancel payment: " . $stmt_delete->error);
         }
 
+
+        // 1b) Mark detail rows of this cancelled payment as inactive (status = 0)
+        $cancelDetailSql = "UPDATE lease_payments_detail SET status = 0 WHERE payment_id = ?";
+        $stmt_cancel_detail = $con->prepare($cancelDetailSql);
+        $stmt_cancel_detail->bind_param("i", $payment_id);
+        if (!$stmt_cancel_detail->execute()) {
+            throw new Exception("Failed to cancel payment detail rows: " . $stmt_cancel_detail->error);
+        }
+
+
         // 2) Reset all schedule payment allocations for this lease to zero,
         //    including discount_apply so discount is fully reversed.
         $reset_sql = "UPDATE lease_schedules 
@@ -57,7 +68,7 @@ if ($_POST) {
 
         // 3) Reapply remaining ACTIVE payments (status = 1) for this lease
         //    in chronological order to rebuild allocations.
-        $payments_sql = "SELECT payment_id, lease_id, schedule_id, payment_date, amount, payment_type, receipt_number
+        $payments_sql = "SELECT payment_id, lease_id, payment_date, amount
                          FROM lease_payments 
                          WHERE lease_id = ? AND status = 1
                          ORDER BY payment_date ASC, payment_id ASC";
@@ -68,105 +79,160 @@ if ($_POST) {
         }
         $res_payments = $stmt_payments->get_result();
 
+        $discount_rate = fetchLeaseDiscountRate($con, isset($payment['lease_type_id']) ? intval($payment['lease_type_id']) : null, intval($payment['lease_id']));
+        $schedule_state = loadLeaseSchedulesForPayment($con, intval($payment['lease_id']));
+
+        $updatePaymentSql = "UPDATE lease_payments SET 
+                schedule_id=?,
+                rent_paid=?,
+                panalty_paid=?,
+                premium_paid=?,
+                discount_apply=?,
+                current_year_payment=?,
+                payment_type=?
+             WHERE payment_id=?";
+        $updatePaymentStmt = $con->prepare($updatePaymentSql);
+        if (!$updatePaymentStmt) {
+            throw new Exception('Failed to prepare payment update');
+        }
+
+        $updateScheduleSql = "UPDATE lease_schedules SET 
+                paid_rent = paid_rent + ?,
+                panalty_paid = panalty_paid + ?,
+                premium_paid = premium_paid + ?,
+                total_paid = total_paid + ?,
+                discount_apply = discount_apply + ?
+             WHERE schedule_id = ?";
+        $updateScheduleStmt = $con->prepare($updateScheduleSql);
+        if (!$updateScheduleStmt) {
+            $updatePaymentStmt->close();
+            throw new Exception('Failed to prepare schedule update');
+        }
+
+        $insertDetailSql = "INSERT INTO lease_payments_detail (
+                payment_id, schedule_id, rent_paid, penalty_paid, premium_paid,
+                discount_apply, current_year_payment, status
+            ) VALUES (?,?,?,?,?,?,?,?)";
+        $insertDetailStmt = $con->prepare($insertDetailSql);
+        if (!$insertDetailStmt) {
+            $updateScheduleStmt->close();
+            $updatePaymentStmt->close();
+            throw new Exception('Failed to prepare payment detail insert');
+        }
+
+        $deleteDetailStmt = $con->prepare("DELETE FROM lease_payments_detail WHERE payment_id = ?");
+        if (!$deleteDetailStmt) {
+            $insertDetailStmt->close();
+            $updateScheduleStmt->close();
+            $updatePaymentStmt->close();
+            throw new Exception('Failed to prepare detail cleanup');
+        }
+
         while ($p = $res_payments->fetch_assoc()) {
-            $p_amount = floatval($p['amount']);
-            $p_date   = $p['payment_date'];
+            $paymentId = intval($p['payment_id']);
+            $paymentAmount = floatval($p['amount']);
+            $paymentDate = $p['payment_date'];
 
-            // Find target schedule for this payment (same logic as before)
-            $sched_sql = "SELECT schedule_id, start_date, end_date, schedule_year, 
-                                 paid_rent, panalty_paid, premium, premium_paid, total_paid
-                          FROM lease_schedules 
-                          WHERE lease_id = ? AND ? BETWEEN start_date AND end_date 
-                          LIMIT 1";
-            $stmt_sched = $con->prepare($sched_sql);
-            $stmt_sched->bind_param("is", $p['lease_id'], $p_date);
-            $stmt_sched->execute();
-            $sched_res = $stmt_sched->get_result();
-            $target_schedule = null;
+            if ($paymentAmount <= 0) {
+                continue;
+            }
 
-            if ($sched_res->num_rows > 0) {
-                $target_schedule = $sched_res->fetch_assoc();
-            } else {
-                // fallback by year
-                $py = date('Y', strtotime($p_date));
-                $sched_year_sql = "SELECT schedule_id, start_date, end_date, schedule_year, 
-                                          paid_rent, panalty_paid, premium, premium_paid, total_paid
-                                   FROM lease_schedules 
-                                   WHERE lease_id = ? AND schedule_year = ? 
-                                   LIMIT 1";
-                $stmt_sy = $con->prepare($sched_year_sql);
-                $stmt_sy->bind_param("ii", $p['lease_id'], $py);
-                $stmt_sy->execute();
-                $res_sy = $stmt_sy->get_result();
-                if ($res_sy->num_rows > 0) {
-                    $target_schedule = $res_sy->fetch_assoc();
+            $allocation = allocateLeasePayment($schedule_state, $paymentDate, $paymentAmount, $discount_rate);
+            $allocations = $allocation['allocations'];
+            $totals = $allocation['totals'];
+            $currentScheduleId = $allocation['current_schedule_id'];
+            $remainingAfter = $allocation['remaining'];
+
+            if ($remainingAfter > 0.01) {
+                throw new Exception('Unable to reallocate payment ID '.$paymentId.' completely');
+            }
+
+            if (empty($allocations)) {
+                $schedule_state = $allocation['schedules'];
+                continue;
+            }
+
+            $totalActual = $totals['rent'] + $totals['penalty'] + $totals['premium'];
+            if (abs($totalActual - $paymentAmount) > 0.01) {
+                throw new Exception('Reallocation mismatch for payment ID '.$paymentId);
+            }
+
+            $paymentType = 'mixed';
+            $newRent = $totals['rent'];
+            $newPenalty = $totals['penalty'];
+            $newPremium = $totals['premium'];
+            $newDiscount = $totals['discount'];
+            $newCurrentYear = $totals['current_year_payment'];
+
+            $updatePaymentStmt->bind_param(
+                'idddddsi',
+                $currentScheduleId,
+                $newRent,
+                $newPenalty,
+                $newPremium,
+                $newDiscount,
+                $newCurrentYear,
+                $paymentType,
+                $paymentId
+            );
+            if (!$updatePaymentStmt->execute()) {
+                throw new Exception('Failed to update payment '.$paymentId.': '.$updatePaymentStmt->error);
+            }
+
+            $deleteDetailStmt->bind_param('i', $paymentId);
+            $deleteDetailStmt->execute();
+
+            foreach ($allocations as $sid => $alloc) {
+                $rentInc = $alloc['rent'];
+                $penInc = $alloc['penalty'];
+                $premInc = $alloc['premium'];
+                $discInc = $alloc['discount'];
+                $curYearInc = $alloc['current_year_payment'];
+                $totalPaidSchedule = $alloc['total_paid'];
+
+                $scheduleId = intval($sid);
+
+                $updateScheduleStmt->bind_param(
+                    'dddddi',
+                    $rentInc,
+                    $penInc,
+                    $premInc,
+                    $totalPaidSchedule,
+                    $discInc,
+                    $scheduleId
+                );
+                if (!$updateScheduleStmt->execute()) {
+                    throw new Exception('Failed to update schedule '.$scheduleId.': '.$updateScheduleStmt->error);
+                }
+
+                $hasDetail = ($rentInc > 0) || ($penInc > 0) || ($premInc > 0) || ($discInc > 0);
+                if ($hasDetail) {
+                    $status = 1;
+                    $insertDetailStmt->bind_param(
+                        'iidddddi',
+                        $paymentId,
+                        $scheduleId,
+                        $rentInc,
+                        $penInc,
+                        $premInc,
+                        $discInc,
+                        $curYearInc,
+                        $status
+                    );
+                    if (!$insertDetailStmt->execute()) {
+                        throw new Exception('Failed to insert payment detail for payment '.$paymentId);
+                    }
                 }
             }
 
-            if (!$target_schedule) {
-                continue; // nothing to allocate to
-            }
-
-            // Recompute total outstanding premium (lease-wide)
-            $prem_sum_sql = "SELECT COALESCE(SUM(premium),0) AS total_premium, 
-                                    COALESCE(SUM(premium_paid),0) AS total_premium_paid 
-                             FROM lease_schedules 
-                             WHERE lease_id = ?";
-            $stmt_pm = $con->prepare($prem_sum_sql);
-            $stmt_pm->bind_param("i", $p['lease_id']);
-            $stmt_pm->execute();
-            $prem_res = $stmt_pm->get_result();
-            $prem_row = $prem_res->fetch_assoc();
-            $total_premium       = floatval($prem_row['total_premium'] ?? 0);
-            $total_premium_paid  = floatval($prem_row['total_premium_paid'] ?? 0);
-            $premium_outstanding = max(0, $total_premium - $total_premium_paid);
-
-            // Recompute penalties up to this schedule's end date
-            $penalty_sum_sql = "SELECT SUM(COALESCE(panalty,0)) as total_penalty, 
-                                       SUM(COALESCE(panalty_paid,0)) as total_penalty_paid
-                                FROM lease_schedules 
-                                WHERE lease_id = ? AND end_date <= ?";
-            $stmt_ps = $con->prepare($penalty_sum_sql);
-            $stmt_ps->bind_param("is", $p['lease_id'], $target_schedule['end_date']);
-            $stmt_ps->execute();
-            $pen_res = $stmt_ps->get_result();
-            $pen_row = $pen_res->fetch_assoc();
-            $total_penalty             = floatval($pen_row['total_penalty'] ?? 0);
-            $total_penalty_paid        = floatval($pen_row['total_penalty_paid'] ?? 0);
-            $total_outstanding_penalty = $total_penalty - $total_penalty_paid;
-
-            // Allocate this payment: premium -> penalty -> rent
-            $remaining_payment = $p_amount;
-            $premium_payment   = 0; 
-            $penalty_payment   = 0; 
-            $rent_payment      = 0;
-
-            if ($premium_outstanding > 0 && $remaining_payment > 0) {
-                $premium_payment   = min($premium_outstanding, $remaining_payment);
-                $remaining_payment -= $premium_payment;
-            }
-
-            if ($total_outstanding_penalty > 0 && $remaining_payment > 0) {
-                $penalty_payment   = min($total_outstanding_penalty, $remaining_payment);
-                $remaining_payment -= $penalty_payment;
-            }
-
-            $rent_payment = $remaining_payment;
-
-            // Update the target schedule by incrementing values
-            $update_sched_sql = "UPDATE lease_schedules SET 
-                                 premium_paid = COALESCE(premium_paid,0) + ?,
-                                 panalty_paid = COALESCE(panalty_paid,0) + ?,
-                                 paid_rent    = COALESCE(paid_rent,0) + ?,
-                                 total_paid   = COALESCE(total_paid,0) + ?
-                                 WHERE schedule_id = ?";
-            $stmt_upd = $con->prepare($update_sched_sql);
-            // 4 decimals + 1 int
-            $stmt_upd->bind_param("ddddi", $premium_payment, $penalty_payment, $rent_payment, $p_amount, $target_schedule['schedule_id']);
-            if (!$stmt_upd->execute()) {
-                throw new Exception('Failed to apply payment during replay: ' . $stmt_upd->error);
-            }
+            $schedule_state = $allocation['schedules'];
         }
+
+        $deleteDetailStmt->close();
+        $insertDetailStmt->close();
+        $updateScheduleStmt->close();
+        $updatePaymentStmt->close();
+        $stmt_payments->close();
 
         // Commit transaction after replay
         $con->commit();

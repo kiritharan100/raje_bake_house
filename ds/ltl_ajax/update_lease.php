@@ -1,6 +1,7 @@
 <?php
 if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); }
 require_once dirname(__DIR__, 2) . '/db.php';
+require_once dirname(__DIR__) . '/ajax/payment_allocator.php';
 header('Content-Type: application/json');
 
 $response = ['success'=>false,'message'=>''];
@@ -469,265 +470,10 @@ function rebuildSchedulesAndReapplyPayments(
         // non-fatal
     }
 
-    // 5) Replay each payment in date order using same logic
-    foreach ($payments as $pay) {
-        if (!applyPaymentToSchedules($con, $lease_id, $pay)) {
-            return false;
-        }
-    }
+    $discountRate = fetchLeaseDiscountRate($con, null, $lease_id);
+    $scheduleState = loadLeaseSchedulesForPayment($con, $lease_id);
 
-    return true;
-}
-
-/**
- * Apply ONE payment row again to schedules & update the row
- * Logic is copied from your Ajax payment script.
- */
-function applyPaymentToSchedules($con, $lease_id, $paymentRow){
-    $payment_id     = (int)$paymentRow['payment_id'];
-    $payment_date   = $paymentRow['payment_date'];
-    $amount         = floatval($paymentRow['amount']);
-    // $location_id    = (int)$paymentRow['location_id']; // not needed for reallocation
-    $payment_method = $paymentRow['payment_method'];
-    $reference_num  = $paymentRow['reference_number'];
-    $notes          = $paymentRow['notes'];
-    $user_id        = (int)$paymentRow['created_by'];
-
-    if ($amount <= 0) {
-        // nothing to apply
-        return true;
-    }
-
-    // -------------------------------------------------
-    // FIND CURRENT SCHEDULE (same as Ajax)
-    // -------------------------------------------------
-    $schedule_id = null;
-
-    $schedule_check = "SELECT schedule_id, start_date, end_date, schedule_year 
-                       FROM lease_schedules 
-                       WHERE lease_id = ? AND ? BETWEEN start_date AND end_date 
-                       LIMIT 1";
-    if ($stmt_check = $con->prepare($schedule_check)){
-        $stmt_check->bind_param("is", $lease_id, $payment_date);
-        $stmt_check->execute();
-        $schedule_result = $stmt_check->get_result();
-        if ($schedule_result->num_rows > 0) {
-            $curSched = $schedule_result->fetch_assoc();
-            $schedule_id = $curSched['schedule_id'];
-        }
-        $stmt_check->close();
-    }
-
-    if (!$schedule_id){
-        $next_sql = "SELECT schedule_id, start_date 
-                     FROM lease_schedules 
-                     WHERE lease_id=? AND start_date > ? 
-                     ORDER BY start_date ASC LIMIT 1";
-        if ($stmt_n = $con->prepare($next_sql)){
-            $stmt_n->bind_param("is",$lease_id,$payment_date);
-            $stmt_n->execute();
-            $next_rs = $stmt_n->get_result();
-            if($next_rs->num_rows>0){
-                $curSched   = $next_rs->fetch_assoc();
-                $schedule_id= $curSched['schedule_id'];
-            }
-            $stmt_n->close();
-        }
-    }
-
-    if(!$schedule_id){
-        // Cannot find schedule for this payment – do not fail the whole process
-        return false;
-    }
-
-    // -------------------------------------------------
-    // LOAD CURRENT SCHEDULE ROW
-    // -------------------------------------------------
-    $cur = mysqli_fetch_assoc(
-        mysqli_query($con, "SELECT * FROM lease_schedules WHERE schedule_id=".$schedule_id." LIMIT 1")
-    );
-
-    $current_annual_amount     = floatval($cur['annual_amount']);
-    $current_rent_paid_so_far  = floatval($cur['paid_rent']);
-    $current_schedule_start    = $cur['start_date'];
-    $current_schedule_end      = $cur['end_date'];
-    $existing_discount_applied = floatval($cur['discount_apply']);
-
-    // -------------------------------------------------
-    // FIND NEXT SCHEDULE
-    // -------------------------------------------------
-    $nxrs = mysqli_query(
-        $con,
-        "SELECT schedule_id, annual_amount
-         FROM lease_schedules
-         WHERE lease_id=".$lease_id." 
-           AND start_date > '".$current_schedule_start."'
-         ORDER BY start_date ASC LIMIT 1"
-    );
-
-    $has_next_schedule = false;
-    $next_schedule_id  = null;
-    $next_annual_amount= 0.0;
-
-    if($nxrs && mysqli_num_rows($nxrs)>0){
-        $nx                = mysqli_fetch_assoc($nxrs);
-        $has_next_schedule = true;
-        $next_schedule_id  = $nx['schedule_id'];
-        $next_annual_amount= floatval($nx['annual_amount']);
-    }
-
-    // -------------------------------------------------
-    // ARREARS CHECK (cumulative before this schedule)
-    // -------------------------------------------------
-    $arrears_sql = "
-        SELECT 
-            SUM(COALESCE(annual_amount,0))  AS sum_annual,
-            SUM(COALESCE(paid_rent,0))      AS sum_paid_rent,
-            SUM(COALESCE(panalty,0))        AS sum_pen,
-            SUM(COALESCE(panalty_paid,0))   AS sum_pen_paid,
-            SUM(COALESCE(premium,0))        AS sum_prem,
-            SUM(COALESCE(premium_paid,0))   AS sum_prem_paid
-        FROM lease_schedules
-        WHERE lease_id = {$lease_id}
-          AND end_date < '{$current_schedule_start}'";
-
-    $ar = mysqli_fetch_assoc(mysqli_query($con,$arrears_sql));
-
-    $sum_annual    = floatval($ar['sum_annual'] ?? 0);
-    $sum_paid_rent = floatval($ar['sum_paid_rent'] ?? 0);
-    $sum_pen       = floatval($ar['sum_pen'] ?? 0);
-    $sum_pen_paid  = floatval($ar['sum_pen_paid'] ?? 0);
-    $sum_prem      = floatval($ar['sum_prem'] ?? 0);
-    $sum_prem_paid = floatval($ar['sum_prem_paid'] ?? 0);
-
-    $outstanding_before = max(0, $sum_annual - $sum_paid_rent)
-                        + max(0, $sum_pen    - $sum_pen_paid)
-                        + max(0, $sum_prem   - $sum_prem_paid);
-
-    $no_arrears_before_start = ($outstanding_before < 0.005);
-
-    // -------------------------------------------------
-    // PAYMENT ALLOCATION: premium → penalty → rent(current)
-    // -------------------------------------------------
-    $remaining_payment = $amount;
-
-    // Premium
-    $cur_premium         = floatval($cur['premium']);
-    $cur_premium_paid    = floatval($cur['premium_paid']);
-    $premium_outstanding = max(0,$cur_premium - $cur_premium_paid);
-    $premium_payment_now = min($remaining_payment,$premium_outstanding);
-    $remaining_payment  -= $premium_payment_now;
-
-    // Penalty
-    $pen_rs = mysqli_fetch_assoc(mysqli_query(
-        $con,"SELECT 
-                SUM(COALESCE(panalty,0)) AS p, 
-                SUM(COALESCE(panalty_paid,0)) AS pp
-              FROM lease_schedules
-              WHERE lease_id=".$lease_id." AND end_date <= '".$cur['end_date']."'"
-    ));
-    $out_pen        = max(0, floatval($pen_rs['p']) - floatval($pen_rs['pp']));
-    $penalty_payment= min($remaining_payment,$out_pen);
-    $remaining_payment -= $penalty_payment;
-
-    // Rent (current year)
-    $rent_payment_current = $remaining_payment;
-    $remaining_payment    = 0;
-
-    // -------------------------------------------------
-    // DISCOUNT LOGIC
-    // -------------------------------------------------
-
-
-        //     $sql = "SELECT * FROM lease_master WHERE lease_type_id = ?";
-        // $stmt = $con->prepare($sql);
-        // $stmt->bind_param("i", $lease_type_id);
-        // $stmt->execute();
-        // $result = $stmt->get_result();
-
-        // if ($row = $result->fetch_assoc()) {
-        //     $discount_rate = floatval($row['discount_rate']/100); 
-        // } else {
-        //     $discount_rate = 0.00;  // default if not found
-        // }
-
-        $discount_rate = 0;
-
-// Get discount_rate from lease_master using lease_id
-$sql = "
-    SELECT lm.discount_rate 
-    FROM leases l
-    LEFT JOIN lease_master lm 
-        ON l.lease_type_id = lm.lease_type_id
-    WHERE l.lease_id = $lease_id
-    LIMIT 1
-";
-
-$result = mysqli_query($con, $sql);
-
-if ($row = mysqli_fetch_assoc($result)) {
-    $discount_rate = floatval($row['discount_rate']) / 100;
-}
-
-
-    // $discount_rate     = 0.10;
-    $discount_amount   = 0.0;
-    $discount_applied  = false;
-
-    $payment_ts  = strtotime($payment_date);
-    $deadline_ts = strtotime($current_schedule_start." +30 days");
-    $within_window = ($payment_ts <= $deadline_ts);
-
-    $prospective_rent  = $current_rent_paid_so_far + $rent_payment_current;
-    $min_for_discount  = $current_annual_amount * 0.90;
-
-    if($existing_discount_applied == 0){
-        // CASE A: discount for current period
-        if($within_window && $no_arrears_before_start && $prospective_rent >= $min_for_discount){
-            $discount_amount  = $current_annual_amount * $discount_rate;
-            $discount_applied = true;
-        }
-
-        // CASE B: next-period early discount
-        if(!$discount_applied && $has_next_schedule && $within_window){
-            if($prospective_rent >= $current_annual_amount && $no_arrears_before_start){
-                $discount_amount  = $next_annual_amount * $discount_rate;
-                $discount_applied = true;
-            }
-        }
-    }
-
-    // -------------------------------------------------
-    // RENT REALLOCATION IF DISCOUNT APPLIED
-    // -------------------------------------------------
-    $rent_payment_next = 0.0;
-
-    if($discount_applied){
-        $max_current_rent = $current_annual_amount - $discount_amount;
-        $new_total_rent   = $current_rent_paid_so_far + $rent_payment_current;
-
-        if($new_total_rent > $max_current_rent && $has_next_schedule){
-            $rent_payment_next   = $new_total_rent - $max_current_rent;
-            $rent_payment_current-= $rent_payment_next;
-
-            if($rent_payment_current < 0){
-                $rent_payment_next += $rent_payment_current;
-                $rent_payment_current = 0;
-            }
-        }
-    }
-
-    // -------------------------------------------------
-    // UPDATE PAYMENT ROW (reprocessed)
-    // -------------------------------------------------
-    $current_year_payment = $rent_payment_current;
-    $total_rent_paid      = $rent_payment_current + $rent_payment_next;
-    $discount_to_apply    = $discount_applied ? $discount_amount : 0.0;
-    $payment_type         = 'mixed';
-
-    if ($stUp = mysqli_prepare(
-        $con,
-        "UPDATE lease_payments SET 
+    $updatePaymentSql = "UPDATE lease_payments SET 
             schedule_id=?,
             rent_paid=?,
             panalty_paid=?,
@@ -735,51 +481,167 @@ if ($row = mysqli_fetch_assoc($result)) {
             discount_apply=?,
             current_year_payment=?,
             payment_type=?
-         WHERE payment_id=?"
-    )){
-        mysqli_stmt_bind_param(
-            $stUp,
-            'idddddsi',
-            $schedule_id,
-            $total_rent_paid,
-            $penalty_payment,
-            $premium_payment_now,
-            $discount_to_apply,
-            $current_year_payment,
-            $payment_type,
-            $payment_id
-        );
-        if (!mysqli_stmt_execute($stUp)){
-            mysqli_stmt_close($stUp);
-            return false;
-        }
-        mysqli_stmt_close($stUp);
-    } else {
+         WHERE payment_id=?";
+    $updatePaymentStmt = $con->prepare($updatePaymentSql);
+    if (!$updatePaymentStmt) {
         return false;
     }
 
-    // -------------------------------------------------
-    // UPDATE CURRENT SCHEDULE AMOUNTS
-    // -------------------------------------------------
-    mysqli_query($con,
-        "UPDATE lease_schedules SET 
-            paid_rent     = paid_rent + {$rent_payment_current},
-            panalty_paid  = panalty_paid + {$penalty_payment},
-            premium_paid  = premium_paid + {$premium_payment_now},
-            total_paid    = total_paid + ".($rent_payment_current + $penalty_payment + $premium_payment_now).",
-            discount_apply= discount_apply + {$discount_to_apply}
-         WHERE schedule_id={$schedule_id}"
-    );
-
-    // Next schedule advance
-    if($rent_payment_next > 0 && $has_next_schedule){
-        mysqli_query($con,
-            "UPDATE lease_schedules SET 
-                paid_rent = paid_rent + {$rent_payment_next},
-                total_paid= total_paid + {$rent_payment_next}
-             WHERE schedule_id={$next_schedule_id}"
-        );
+    $updateScheduleSql = "UPDATE lease_schedules SET 
+            paid_rent = paid_rent + ?,
+            panalty_paid = panalty_paid + ?,
+            premium_paid = premium_paid + ?,
+            total_paid = total_paid + ?,
+            discount_apply = discount_apply + ?
+         WHERE schedule_id = ?";
+    $updateScheduleStmt = $con->prepare($updateScheduleSql);
+    if (!$updateScheduleStmt) {
+        $updatePaymentStmt->close();
+        return false;
     }
+
+    $insertDetailSql = "INSERT INTO lease_payments_detail (
+            payment_id, schedule_id, rent_paid, penalty_paid, premium_paid,
+            discount_apply, current_year_payment, status
+        ) VALUES (?,?,?,?,?,?,?,?)";
+    $insertDetailStmt = $con->prepare($insertDetailSql);
+    if (!$insertDetailStmt) {
+        $updateScheduleStmt->close();
+        $updatePaymentStmt->close();
+        return false;
+    }
+
+    $deleteDetailStmt = $con->prepare("DELETE FROM lease_payments_detail WHERE payment_id = ?");
+    if (!$deleteDetailStmt) {
+        $insertDetailStmt->close();
+        $updateScheduleStmt->close();
+        $updatePaymentStmt->close();
+        return false;
+    }
+
+    foreach ($payments as $pay) {
+        $paymentId = intval($pay['payment_id']);
+        $amount = floatval($pay['amount'] ?? 0);
+        $paymentDate = $pay['payment_date'];
+
+        if ($amount <= 0) {
+            continue;
+        }
+
+        $allocation = allocateLeasePayment($scheduleState, $paymentDate, $amount, $discountRate);
+        $allocations = $allocation['allocations'];
+        $totals = $allocation['totals'];
+        $currentScheduleId = $allocation['current_schedule_id'];
+        $remainingAfter = $allocation['remaining'];
+
+        if ($remainingAfter > 0.01) {
+            $deleteDetailStmt->close();
+            $insertDetailStmt->close();
+            $updateScheduleStmt->close();
+            $updatePaymentStmt->close();
+            return false;
+        }
+
+        if (empty($allocations)) {
+            $scheduleState = $allocation['schedules'];
+            continue;
+        }
+
+        $totalActual = $totals['rent'] + $totals['penalty'] + $totals['premium'];
+        if (abs($totalActual - $amount) > 0.01) {
+            $deleteDetailStmt->close();
+            $insertDetailStmt->close();
+            $updateScheduleStmt->close();
+            $updatePaymentStmt->close();
+            return false;
+        }
+
+        $paymentType = 'mixed';
+        $newRent = $totals['rent'];
+        $newPenalty = $totals['penalty'];
+        $newPremium = $totals['premium'];
+        $newDiscount = $totals['discount'];
+        $newCurrentYear = $totals['current_year_payment'];
+
+        $updatePaymentStmt->bind_param(
+            'idddddsi',
+            $currentScheduleId,
+            $newRent,
+            $newPenalty,
+            $newPremium,
+            $newDiscount,
+            $newCurrentYear,
+            $paymentType,
+            $paymentId
+        );
+        if (!$updatePaymentStmt->execute()) {
+            $deleteDetailStmt->close();
+            $insertDetailStmt->close();
+            $updateScheduleStmt->close();
+            $updatePaymentStmt->close();
+            return false;
+        }
+
+        $deleteDetailStmt->bind_param('i', $paymentId);
+        $deleteDetailStmt->execute();
+
+        foreach ($allocations as $sid => $alloc) {
+            $scheduleId = intval($sid);
+            $rentInc = $alloc['rent'];
+            $penInc = $alloc['penalty'];
+            $premInc = $alloc['premium'];
+            $discInc = $alloc['discount'];
+            $curYearInc = $alloc['current_year_payment'];
+            $totalPaidSchedule = $alloc['total_paid'];
+
+            $updateScheduleStmt->bind_param(
+                'dddddi',
+                $rentInc,
+                $penInc,
+                $premInc,
+                $totalPaidSchedule,
+                $discInc,
+                $scheduleId
+            );
+            if (!$updateScheduleStmt->execute()) {
+                $deleteDetailStmt->close();
+                $insertDetailStmt->close();
+                $updateScheduleStmt->close();
+                $updatePaymentStmt->close();
+                return false;
+            }
+
+            $hasDetail = ($rentInc > 0) || ($penInc > 0) || ($premInc > 0) || ($discInc > 0);
+            if ($hasDetail) {
+                $status = 1;
+                $insertDetailStmt->bind_param(
+                    'iidddddi',
+                    $paymentId,
+                    $scheduleId,
+                    $rentInc,
+                    $penInc,
+                    $premInc,
+                    $discInc,
+                    $curYearInc,
+                    $status
+                );
+                if (!$insertDetailStmt->execute()) {
+                    $deleteDetailStmt->close();
+                    $insertDetailStmt->close();
+                    $updateScheduleStmt->close();
+                    $updatePaymentStmt->close();
+                    return false;
+                }
+            }
+        }
+
+        $scheduleState = $allocation['schedules'];
+    }
+
+    $deleteDetailStmt->close();
+    $insertDetailStmt->close();
+    $updateScheduleStmt->close();
+    $updatePaymentStmt->close();
 
     return true;
 }
