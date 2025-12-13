@@ -7,7 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="description" content="codedthemes">
-    <meta name="keywords" content=", Responsive, Landing, Bootstrap, App, Template, Mobile, iOS, Android, apple, creative app">
+    <meta name="keywords"
+        content=", Responsive, Landing, Bootstrap, App, Template, Mobile, iOS, Android, apple, creative app">
     <meta name="author" content="codedthemes">
 
     <link rel="shortcut icon" href="assets/images/favicon.png" type="image/x-icon">
@@ -22,10 +23,22 @@
     <link rel="stylesheet" type="text/css" href="assets/css/color/color-1.min.css" id="color" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <style>
-        ul.password-req { list-style: none; padding-left: 0; }
-        .password-req li { margin: 4px 0; }
-        .password-req .valid { color: #198754; }
-        .password-req .invalid { color: #dc3545; }
+    ul.password-req {
+        list-style: none;
+        padding-left: 0;
+    }
+
+    .password-req li {
+        margin: 4px 0;
+    }
+
+    .password-req .valid {
+        color: #198754;
+    }
+
+    .password-req .invalid {
+        color: #dc3545;
+    }
     </style>
 </head>
 
@@ -35,12 +48,12 @@
             <div class="row">
                 <div class="col-xs-12">
                     <div class="login-card card-block">
-                      		<div class="text-center">
-								 	<img src="img/gov.png" alt="logo" width='40px;' >
-									<h2 style='color:#000;' >IRMIS</h2>
-									<font style='color:#000;'>Department of Land Administration <br>
- 									Eastern Province</font>
-							</div>
+                        <div class="text-center">
+                            <img src="img/gov.png" alt="logo" width='40px;'>
+                            <h2 style='color:#000;'>RBH</h2>
+                            <font style='color:#000;'>Raja Bake House<br>
+                                Trincomalee</font>
+                        </div>
 
                         <?php
                         ini_set('display_errors', 1);
@@ -114,27 +127,31 @@
                         <h3 class="text-primary text-center m-b-25">Accept Invitation</h3>
 
                         <?php if (!isset($_POST['set_password'])) { ?>
-                            <form method="POST" action="">
-                                <div class="md-group" align="center">
-                                    <div class="md-input-wrapper">
-                                        <input type="number" name="mobile_number" style="text-align:center;" required class="md-form-control" style="width:200px;">
-                                        <label>Enter Your Mobile Number:</label>
-                                    </div>
+                        <form method="POST" action="">
+                            <div class="md-group" align="center">
+                                <div class="md-input-wrapper">
+                                    <input type="number" name="mobile_number" style="text-align:center;" required
+                                        class="md-form-control" style="width:200px;">
+                                    <label>Enter Your Mobile Number:</label>
                                 </div>
-                                <div class="md-group" align="center">
-                                    <div class="md-input-wrapper">
-                                        <input type="text" name="token" style="text-align:center;" required class="md-form-control" style="width:200px;">
-                                        <label>Token</label>
-                                    </div>
+                            </div>
+                            <div class="md-group" align="center">
+                                <div class="md-input-wrapper">
+                                    <input type="text" name="token" style="text-align:center;" required
+                                        class="md-form-control" style="width:200px;">
+                                    <label>Token</label>
                                 </div>
-                                <div class="btn-forgot">
-                                    <input type="submit" name="set_password" value="Set Password" class="btn btn-primary btn-md waves-effect waves-light text-center">
-                                    <br><br>
-                                    <a href="login.php" class="btn btn-outline-secondary btn-md waves-effect waves-light">Go to Login</a>
-                                </div>
-                            </form>
+                            </div>
+                            <div class="btn-forgot">
+                                <input type="submit" name="set_password" value="Set Password"
+                                    class="btn btn-primary btn-md waves-effect waves-light text-center">
+                                <br><br>
+                                <a href="login.php" class="btn btn-outline-secondary btn-md waves-effect waves-light">Go
+                                    to Login</a>
+                            </div>
+                        </form>
                         <?php } else { ?>
-                            <?php
+                        <?php
                             // Verify token + rate limit then show password form
                             $token = $_POST['token'] ?? '';
                             $user_name = $_POST['mobile_number'] ?? '';
@@ -164,46 +181,54 @@
                                 exit;
                             }
                             ?>
-                            <form method="post" action="">
-                                <input type="hidden" name="token" value="<?php echo htmlspecialchars($token); ?>">
-                                <input type="hidden" name="user_name" value="<?php echo htmlspecialchars($user_name); ?>">
+                        <form method="post" action="">
+                            <input type="hidden" name="token" value="<?php echo htmlspecialchars($token); ?>">
+                            <input type="hidden" name="user_name" value="<?php echo htmlspecialchars($user_name); ?>">
 
-                                <div class="md-group" align="center">
-                                    <div class="md-input-wrapper">
-                                        <input type="password" name="password" id="new_password" class="md-form-control" style="width:200px; text-align:center;" required>
-                                        <label>Please set your password:</label>
-                                    </div>
-                                    <div class="form-check mt-2">
-                                        <input class="form-check-input" type="checkbox" id="show_new">
-                                        <label class="form-check-label" for="show_new">Show Password</label>
-                                    </div>
+                            <div class="md-group" align="center">
+                                <div class="md-input-wrapper">
+                                    <input type="password" name="password" id="new_password" class="md-form-control"
+                                        style="width:200px; text-align:center;" required>
+                                    <label>Please set your password:</label>
                                 </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="show_new">
+                                    <label class="form-check-label" for="show_new">Show Password</label>
+                                </div>
+                            </div>
 
-                                <div class="md-group" align="center">
-                                    <div class="md-input-wrapper">
-                                        <input type="password" name="confirm_password" id="confirm_password" class="md-form-control" style="width:200px; text-align:center;" required>
-                                        <label>Confirm password</label>
-                                    </div>
-                                    <div class="form-check mt-2">
-                                        <input class="form-check-input" type="checkbox" id="show_confirm">
-                                        <label class="form-check-label" for="show_confirm">Show Confirm Password</label>
-                                    </div>
-                                    <div class="mt-3">
-                                        <ul class="password-req" id="requirements">
-                                            <li id="length" class="invalid"><i class="fa fa-times"></i> Min 8 characters</li>
-                                            <li id="uppercase" class="invalid"><i class="fa fa-times"></i> At least one uppercase</li>
-                                            <li id="lowercase" class="invalid"><i class="fa fa-times"></i> At least one lowercase</li>
-                                            <li id="number" class="invalid"><i class="fa fa-times"></i> At least one number</li>
-                                            <li id="special" class="invalid"><i class="fa fa-times"></i> At least one special</li>
-                                            <li id="match" class="invalid"><i class="fa fa-times"></i> Passwords match</li>
-                                        </ul>
-                                    </div>
+                            <div class="md-group" align="center">
+                                <div class="md-input-wrapper">
+                                    <input type="password" name="confirm_password" id="confirm_password"
+                                        class="md-form-control" style="width:200px; text-align:center;" required>
+                                    <label>Confirm password</label>
                                 </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="show_confirm">
+                                    <label class="form-check-label" for="show_confirm">Show Confirm Password</label>
+                                </div>
+                                <div class="mt-3">
+                                    <ul class="password-req" id="requirements">
+                                        <li id="length" class="invalid"><i class="fa fa-times"></i> Min 8 characters
+                                        </li>
+                                        <li id="uppercase" class="invalid"><i class="fa fa-times"></i> At least one
+                                            uppercase</li>
+                                        <li id="lowercase" class="invalid"><i class="fa fa-times"></i> At least one
+                                            lowercase</li>
+                                        <li id="number" class="invalid"><i class="fa fa-times"></i> At least one number
+                                        </li>
+                                        <li id="special" class="invalid"><i class="fa fa-times"></i> At least one
+                                            special</li>
+                                        <li id="match" class="invalid"><i class="fa fa-times"></i> Passwords match</li>
+                                    </ul>
+                                </div>
+                            </div>
 
-                                <div class="btn-forgot">
-                                    <input type="submit" id="submitBtn" disabled value="Set Password" class="btn btn-primary btn-md waves-effect waves-light text-center">
-                                </div>
-                            </form>
+                            <div class="btn-forgot">
+                                <input type="submit" id="submitBtn" disabled value="Set Password"
+                                    class="btn btn-primary btn-md waves-effect waves-light text-center">
+                            </div>
+                        </form>
                         <?php } ?>
                     </div>
                 </div>
@@ -219,17 +244,17 @@
     <script type="text/javascript" src="assets/pages/elements.js"></script>
 
     <script>
-    $(document).ready(function(){
-        function validatePassword(){
+    $(document).ready(function() {
+        function validatePassword() {
             var password = $("#new_password").val();
-            var confirm  = $("#confirm_password").val();
+            var confirm = $("#confirm_password").val();
 
-            var length   = password.length >= 8;
-            var upper    = /[A-Z]/.test(password);
-            var lower    = /[a-z]/.test(password);
-            var number   = /[0-9]/.test(password);
-            var special  = /[\W_]/.test(password);
-            var match    = password === confirm && password.length > 0;
+            var length = password.length >= 8;
+            var upper = /[A-Z]/.test(password);
+            var lower = /[a-z]/.test(password);
+            var number = /[0-9]/.test(password);
+            var special = /[\W_]/.test(password);
+            var match = password === confirm && password.length > 0;
 
             updateReq("#length", length);
             updateReq("#uppercase", upper);
@@ -238,27 +263,29 @@
             updateReq("#special", special);
             updateReq("#match", match);
 
-            if(length && upper && lower && number && special && match){
+            if (length && upper && lower && number && special && match) {
                 $("#submitBtn").prop("disabled", false);
             } else {
                 $("#submitBtn").prop("disabled", true);
             }
         }
 
-        function updateReq(id, status){
-            if(status){
-                $(id).removeClass("invalid").addClass("valid").html('<i class="fa fa-check"></i> ' + $(id).text().replace(/^.*? /, ""));
+        function updateReq(id, status) {
+            if (status) {
+                $(id).removeClass("invalid").addClass("valid").html('<i class="fa fa-check"></i> ' + $(id)
+                    .text().replace(/^.*? /, ""));
             } else {
-                $(id).removeClass("valid").addClass("invalid").html('<i class="fa fa-times"></i> ' + $(id).text().replace(/^.*? /, ""));
+                $(id).removeClass("valid").addClass("invalid").html('<i class="fa fa-times"></i> ' + $(id)
+                    .text().replace(/^.*? /, ""));
             }
         }
 
         $("#new_password, #confirm_password").on("keyup", validatePassword);
 
-        $("#show_new").on("change", function(){
+        $("#show_new").on("change", function() {
             $("#new_password").attr("type", this.checked ? "text" : "password");
         });
-        $("#show_confirm").on("change", function(){
+        $("#show_confirm").on("change", function() {
             $("#confirm_password").attr("type", this.checked ? "text" : "password");
         });
     });

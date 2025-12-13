@@ -1,5 +1,5 @@
 <?php include 'header.php';
-checkPermission(1);
+ 
 ?>
 
 
@@ -36,25 +36,7 @@ if (isset($_POST['update_user'])) {
 }
 
 
-// if (isset($_POST['update_user'])) {
-//     $userId = $_POST['editUserId'];
-//     $name = $_POST['editName'];
-//     $email = $_POST['editEmail'];
-//     $email = $_POST['editEmail'];
-//     $mobile_no = $_POST['editmobile_no'];
-//     // Retrieve other fields as needed
-
-//     $sql = "UPDATE user_license SET i_name = ?, username = ? WHERE usr_id = ?";
-//     $stmt = $con->prepare($sql);
-//     $stmt->bind_param("ssi", $name, $email, $userId);  // Adjust the types accordingly
-//     if ($stmt->execute()) {
-//         // Success, you can redirect or show a success message
-//         echo "User updated successfully";
-//     } else {
-//         // Error handling
-//         echo "Error updating user: " . $con->error;
-//     }
-// }
+ 
 
 
 
@@ -124,19 +106,16 @@ if (isset($_POST['submit_user_location'])) {
     if ($stmt->execute()) {
 
         // NEW SMS MODULE
-        require_once __DIR__ . '/../sms_helper.php';
-        $sms = new SMS_Helper();
+   
 
-        $message = "You are invited to set up your IRMIS account.  Token: $token , Use New User button on the login page";
+        $message = "You are invited to set up your RBH System account.  Token: $token , Use New User button on the login page";
         $sms_type = "User Invitation";
 
         // SMS send & log
-        $sms_result = $sms->sendSMS(
-            $lease_id = 0,      // When not related to lease use 0
-            $mobile_no,
-            $message,
-            $sms_type
-        );
+   
+
+
+        $result = sendSMS($mobile_no, $message);
 
         //update user log
         UserLog(1, "New User Created", "User $name created by admin");
@@ -230,7 +209,7 @@ if (isset($_POST['submit_user_location'])) {
                                             <td><?php echo $row['usr_id'] ?></td>
                                             <td><?php echo $row['i_name'] ?></td>
                                             <td><?php echo $row['username'] ?></td>
-                                            <td align='center' ><?= $row['nic'] ?>
+                                            <td align='center'><?= $row['nic'] ?>
                                             <td align='center'>
                                                 <?php 
                         if (!empty($row['role_id'])) {
@@ -325,10 +304,10 @@ if (isset($_POST['submit_user_location'])) {
                         <input type="number" class="form-control" id="editEmail" name="editEmail" required>
                     </div>
 
-                     <div class="form-group">
+                    <div class="form-group">
                         <label for="editnic">NIC No</label>
-                        <input type="text" class="form-control" id="editnic" name="editnic"
-                            placeholder='123456789V' required>
+                        <input type="text" class="form-control" id="editnic" name="editnic" placeholder='123456789V'
+                            required>
                     </div>
 
                     <div class="form-group">

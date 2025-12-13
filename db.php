@@ -62,11 +62,7 @@ if (!function_exists('decrypt_id')) {
     }
 }
 
-if (!function_exists('hasPermission')) {
-    function hasPermission($p) {
-        return !empty($_SESSION['permissions']) && in_array($p, $_SESSION['permissions']);
-    }
-}
+ 
 
  
 if (!function_exists('UserLog')) {

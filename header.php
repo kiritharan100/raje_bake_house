@@ -89,7 +89,7 @@
     <link rel="stylesheet" href="assets/css/bootstrap-select.min.css" />
     <script src="assets/plugins/jquery/dist/jquery.min.js"></script>
     <script src="assets/plugins/notification/js/bootstrap-growl.min.js"></script>
-     
+
     <style>
     .loader-bg {
         margin: auto;
@@ -277,4 +277,3 @@
             });
         };
         </script>
-        <?php include("assets/js.php"); ?>

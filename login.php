@@ -8,7 +8,49 @@ date_default_timezone_set("Asia/Colombo");
 // Load Database & Settings
 // -------------------------
 include 'db.php';
-require_once __DIR__ . '/sms_helper.php'; // New SMS gateway helper
+
+
+    function sendSMS($to, $message) {
+    // Global credentials
+    $user_id   = 290;
+    $api_key   = 'a52147cf-ec5b-451d-b4c0-058c030a6d21';
+    $sender_id = 'DtecStudio';
+    $url       = "https://smslenz.lk/api/send-sms";
+
+    $data = [
+        'user_id'   => $user_id,
+        'api_key'   => $api_key,
+        'sender_id' => $sender_id,
+        'contact'   => $to,
+        'message'   => $message,
+    ];
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    $response = curl_exec($ch);
+    $timestamp = date("Y-m-d H:i:s");
+
+    if (curl_errno($ch)) {
+        $error = curl_error($ch);
+        $logMessage = "[$timestamp] ERROR sending to $to: $error\n";
+        file_put_contents("sms_log.txt", $logMessage, FILE_APPEND);
+        curl_close($ch);
+        return ['success' => false, 'error' => $error];
+    }
+
+    curl_close($ch);
+
+    // Log the response
+    // $logMessage = "[$timestamp] SMS sent to $to: $response\n";
+    // file_put_contents("sms_log.txt", $logMessage, FILE_APPEND);
+
+    return ['success' => true, 'response' => $response];
+}
+ 
 
 function getSettings($con) {
     $result = mysqli_query($con, "SELECT * FROM letter_head WHERE id = 1");
@@ -16,7 +58,7 @@ function getSettings($con) {
 }
 
 // Instantiate reusable SMS helper (Dialog API based)
-$smsHelper = new SMS_Helper();
+ 
 
 // -------------------------
 // Handle Login Submission
@@ -105,14 +147,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['LoginSubmit'])) {
             $_SESSION['address1'] = 'Eastern Province';
 
             $role_id = (int)$row['role_id'];
-            $perm_stmt = $conn->prepare("SELECT act_id FROM group_activity_map WHERE group_id = ? AND status = 1");
-            $perm_stmt->bind_param('i', $role_id);
-            $perm_stmt->execute();
-            $perm_res = $perm_stmt->get_result();
-            $permissions = [];
-            while ($r = $perm_res->fetch_assoc()) { $permissions[] = $r['act_id']; }
-            $perm_stmt->close();
-            $_SESSION['permissions'] = $permissions;
+            
+            $_SESSION['permissions'] = 1;
 
             $log_stmt = $con->prepare("INSERT INTO user_log (usr_id, module, action, detail) VALUES (?, '0', 'Login', ?)");
             $detail = 'Login from ' . $ip;
@@ -120,7 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['LoginSubmit'])) {
             $log_stmt->execute();
             $log_stmt->close();
 
-            $cookie_name = 'DR' . $user_id;
+            $cookie_name = 'RBH_DR' . $user_id;
             $encrypted_token = $_COOKIE[$cookie_name] ?? null;
             $decryption = null;
             if ($encrypted_token) {
@@ -142,10 +178,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['LoginSubmit'])) {
                 $sms_to = $settings['admin_device_approval'] ? $settings['gm_mobile'] : $row['username'];
                 $sms_msg = $settings['admin_device_approval']
                     ? 'User ' . $row['i_name'] . ' is accessing from a new device. Share this token if valid: ' . $new_token
-                    : 'Your device registration token for IRCMS: ' . $new_token;
+                    : 'Your device registration token for for the System (RBH): ' . $new_token;
                 // Use new gateway (sms_type DEVICE or DEVICE_ADMIN)
                 $sms_type = "Device Registration";
-                $smsHelper->sendSMS(0, $sms_to, $sms_msg, $sms_type);
+
+                        $xxxx = sendSMS($sms_to, $sms_msg);
+
+                        if ($xxxx['success']) {
+                            echo "SMS Sent  ";
+                        } else {
+                            echo "SMS Error: " . $result['error'];
+                        }
+                // $smsHelper->sendSMS(0, $sms_to, $sms_msg, $sms_type);
                 echo "<script>window.location.href = 'device_registration.php?ip=$ip';</script>";
                 exit;
             }
@@ -232,15 +276,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['LoginSubmit'])) {
     <div class="login-wrapper w-100 px-3">
         <div class="card p-4">
             <div class="text-center login-logo mb-3">
-                <img src="img/gov.png" alt="Logo" style='height:80px;'>
+                <img src="img/logo1.png" alt="Logo" style='height:80px;'>
             </div>
-            <h1 class="text-center text-success " style=''>
-                <b> IRCMS </b>
-            </h1>
+
 
             <h5 class="text-center text-success mb-3">
 
-                <?php echo isset($entity) ? htmlspecialchars($entity) : 'Department of Land Administration<br> Eastern Province'; ?>
+                <?php echo isset($entity) ? htmlspecialchars($entity) : 'Raja Bake House<br> Trincomalee'; ?>
             </h5>
             <form method="POST" action="">
                 <div class="mb-3">

@@ -1,4 +1,3 @@
-
 <?php include 'header.php'; ?>
 <?php include("assets/js.php"); ?>
 <div class="modal fade" id="browserModal" tabindex="-1" role="dialog" aria-labelledby="browserModalLabel">
@@ -50,24 +49,24 @@
 
 
 
-                        <?php if (hasPermission(11)): ?>
+
                         <a href='ds'>
                             <div class="col-sm-3 col-xs-12 waves-effect waves-light">
                                 <div class="grid-material bg-danger" style="opacity: .9;"><img src='img/ds.png'
                                         width='100px;'><br> Divisional Secretariat</div>
                             </div>
-                        </a> <?php endif; ?>
+                        </a>
 
 
 
-                        <?php if (hasPermission(9)): ?>
+
                         <a href='admin'>
                             <div class="col-sm-3 col-xs-12 waves-effect waves-light">
                                 <div class="grid-material bg-danger" style="opacity: .9;"><img src='img/admin1.png'
                                         width='100px;'><br> ADMIN</div>
                             </div>
                         </a>
-                        <?php endif; ?>
+
 
 
 
@@ -101,10 +100,10 @@ $module_q = mysqli_query($con, "
     LIMIT 1
 ");
 
-$has_module = false;
-if ($row = mysqli_fetch_assoc($module_q)) {
-    $has_module = $row['accounts'] || $row['store'] || $row['admin'] || $row['report'];
-}
+// $has_module = false;
+// if ($row = mysqli_fetch_assoc($module_q)) {
+//     $has_module = $row['accounts'] || $row['store'] || $row['admin'] || $row['report'];
+// }
 
 // Determine message
 $alertMessage = '';
@@ -112,9 +111,10 @@ if (!$has_location && !$has_module) {
     $alertMessage = "No modules or locations have been allocated to your account.<br>Please contact the system administrator.";
 } elseif (!$has_location) {
     $alertMessage = "No location has been allocated to your account.<br>Please contact the system administrator.";
-} elseif (!$has_module) {
-    $alertMessage = "No module has been allocated to your account.<br>Please contact the system administrator.";
-}
+} 
+// elseif (!$has_module) {
+//     $alertMessage = "No module has been allocated to your account.<br>Please contact the system administrator.";
+// }
 
 // Show alert if needed
 if ($alertMessage !== '') {

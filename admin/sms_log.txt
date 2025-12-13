@@ -1,0 +1,1 @@
+[2025-12-13 22:14:36] SMS sent to 0770888501: {"message":"SMS sent successfully","data":{"status":"success","campaign_id":88103,"message":"You are invited to set up your RBH System account.  Token: 55267 , Use New User button on the login page","sender_id":"DtecStudio","pages":1,"recipient_number":"0770888501","sms_credit_balance":"767.51"}}

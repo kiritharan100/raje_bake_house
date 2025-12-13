@@ -12,16 +12,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
       exit;
    }
 
-   
-    if (!isset($_SESSION['permissions'])) {
-    header("Location: login.php");
-    exit;
-    }
 
- 
-
-   
-   
    
      $user = $_SESSION['username'];
      $sel_query="SELECT * from user_license where username='$user'";
@@ -38,7 +29,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
      }
      
      
- $cookie_name = "DR" . $user_id;
+    $cookie_name = "RBH_DR" . $user_id;
       $username = $user_row['username'];
       if (isset($_COOKIE[$cookie_name])) {
         $encrypted_token = $_COOKIE[$cookie_name];
@@ -60,10 +51,10 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
         // Check if token matches for this username
         // $check_sql = "SELECT 1 FROM user_device WHERE pf_no = '$username' AND token = '$decrypted_token'";
         // $check_result = mysqli_query($con, $check_sql);
-$check_sql = $conn1->prepare("SELECT 1 FROM user_device WHERE pf_no = ? AND token = ?");
-$check_sql->bind_param("ss", $username, $decrypted_token);
-$check_sql->execute();
-$check_result = $check_sql->get_result();
+            $check_sql = $conn1->prepare("SELECT 1 FROM user_device WHERE pf_no = ? AND token = ?");
+            $check_sql->bind_param("ss", $username, $decrypted_token);
+            $check_sql->execute();
+            $check_result = $check_sql->get_result();
 
         if (mysqli_num_rows($check_result) === 0) {
             // ❌ Invalid device - redirect to login
@@ -138,5 +129,9 @@ if (!function_exists('sendSMS')) {
         return ['success' => true, 'response' => $response];
     }
 }
-mysqli_set_charset($con, "utf8mb4");
+// mysqli_set_charset($con, "utf8mb4");
+
+
+
+ 
 ?>
