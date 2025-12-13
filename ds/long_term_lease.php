@@ -111,7 +111,8 @@ if (isset($_GET['order_filter']) && array_key_exists($_GET['order_filter'], $ord
 
 
                         <?php if (hasPermission(13)): ?>
-                        <button class="btn btn-primary float-right" data-toggle="modal" data-target="#benModal">
+                        <button type='button' class="btn btn-primary float-right" data-toggle="modal"
+                            data-target="#benModal">
                             Add Lease Application
                         </button>
                         <?php endif; ?>

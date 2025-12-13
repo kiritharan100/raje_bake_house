@@ -46,8 +46,11 @@ if ($md5 !== '') {
                             $r3 = mysqli_stmt_get_result($st3);
                             if ($r3) { $lease = mysqli_fetch_assoc($r3); }
                             mysqli_stmt_close($st3);
+                            
                         }
                         if ($lease) { $lease_number = $lease['lease_number'] ?? '-'; }
+                        $file_number = $lease['file_number'] ?? '-';
+                        
                     }
                     mysqli_stmt_close($st2);
                 }
@@ -142,6 +145,15 @@ $due_date = date('d/m/Y', strtotime($outstanding_date));
 
 
 <style>
+@media print {
+    .page-break {
+        page-break-before: always;
+        /* legacy */
+        break-before: page;
+        /* modern */
+    }
+}
+
 .outstanding-table {
     width: 90%;
     margin: 12px auto 0;
@@ -204,10 +216,8 @@ $due_date = date('d/m/Y', strtotime($outstanding_date));
 <body>
 
     <div class="right">
-        எமது இல. ..................................... <br>
-        ....................................................... <br>
-        ....................................................... <br>
-        தேதி : .........................................
+        எமது இல. <?=  $file_number ?> <br><br>
+        திகதி : .................................
     </div>
 
     <p class="bold">இணைப்பு - 09</p>
@@ -248,7 +258,7 @@ $due_date = date('d/m/Y', strtotime($outstanding_date));
     </p>
 
     <p class="section">
-        நிலுவையான குத்தகைப்பணம் பற்றிய விபரம் இணைக்கப்பட்டுள்ளது.
+        நிலுவையான குத்தகைப்பணம் பற்றிய விபரம் இத்துடன் இணைக்கப்பட்டுள்ளது.
     </p>
 
 
@@ -301,9 +311,7 @@ $due_date = date('d/m/Y', strtotime($outstanding_date));
     <body>
 
         <div class="right">
-            මාගේ අංකය ............................. <br>
-            ....................................................... <br>
-            ....................................................... <br>
+            මාගේ අංකය <?=  $file_number ?> <br> <br>
             දිනය : .........................................
         </div>
 
@@ -509,74 +517,38 @@ foreach ($rentAfterFIFO as $year => $rentBal) {
 ?>
 
 
-    <!-- =====================================================================
-     STEP 6: DISPLAY TABLE WITH OPTIONAL COLUMNS + TOTAL ROW
-===================================================================== -->
 
-    <table border="1" cellpadding="4" cellspacing="0" class="outstanding-table"
-        style="border-collapse:collapse; width:70%; font-size:12px;">
-        <thead>
-            <tr>
-                <th>Year</th>
-                <th>Balance Rent</th>
 
-                <?php if ($hasPenalty): ?>
-                <th>Balance Penalty</th>
-                <?php endif; ?>
 
-                <?php if ($hasPremium): ?>
-                <th>Balance Premium</th>
-                <?php endif; ?>
+    <?php 
+    $client_md5 = isset($_COOKIE['client_cook']) ? $_COOKIE['client_cook'] : '';
+    if ($client_md5) {
+    $qClient = mysqli_query(
+        $con,
+        "SELECT client_name, bank_and_branch, account_number, account_name, client_email
+        FROM client_registration
+        WHERE md5_client='" . mysqli_real_escape_string($con,$client_md5) . "' LIMIT 1"
+    );
+    if ($qClient && mysqli_num_rows($qClient) === 1) {
+        $client = mysqli_fetch_assoc($qClient);
+    }
+}
+if($client['bank_and_branch'] != "" && $client['account_number'] != "" && $client['account_name'] != ""){ 
+    ?>
 
-                <th>Total Outstanding</th>
-            </tr>
-        </thead>
+    <p>
+        <strong>Bank Details for Payment:</strong><br>
+        Bank and Branch: <?= h($client['bank_and_branch']) ?><br>
+        Account Number: <?= h($client['account_number']) ?><br>
+        Account Name: <?= h($client['account_name']) ?>
+    </p>
+    <?php } ?>
 
-        <tbody>
-            <?php if (empty($finalRows)): ?>
-            <tr>
-                <td colspan="<?= 3 + ($hasPenalty?1:0) + ($hasPremium?1:0) ?>" style="text-align:center;">No Outstanding
-                </td>
-            </tr>
 
-            <?php else: foreach ($finalRows as $row): ?>
-            <tr>
-                <td><?= $row['year'] ?></td>
-                <td style="text-align:right;">
-                    <?php echo number_format($row['rent'], 2);  $current_year_rent=$row['rent']; ?>
-                </td>
 
-                <?php if ($hasPenalty): ?>
-                <td style="text-align:right;"><?= number_format($row['pen'], 2) ?></td>
-                <?php endif; ?>
 
-                <?php if ($hasPremium): ?>
-                <td style="text-align:right;"><?= number_format($row['prem'], 2) ?></td>
-                <?php endif; ?>
 
-                <td style="text-align:right;"><?= number_format($row['total'], 2) ?></td>
-            </tr>
-            <?php endforeach; ?>
 
-            <!-- TOTAL ROW -->
-            <tr style="font-weight:bold; background:#f8f8f8;">
-                <td>Total</td>
-                <td style="text-align:right;"><?= number_format($totalRent, 2) ?></td>
-
-                <?php if ($hasPenalty): ?>
-                <td style="text-align:right;"><?= number_format($totalPen, 2) ?></td>
-                <?php endif; ?>
-
-                <?php if ($hasPremium): ?>
-                <td style="text-align:right;"><?= number_format($totalPrem, 2) ?></td>
-                <?php endif; ?>
-
-                <td style="text-align:right;"><?= number_format($totalAll, 2) ?></td>
-            </tr>
-
-            <?php endif; ?>
-        </tbody>
-    </table>
     <?php if($_REQUEST['language'] == "TA"){ ?>
     <br><br>
 
@@ -614,3 +586,80 @@ document.getElementById("total_outsatanding_tamil").innerText = total_outsatandi
 
 </html>
 <?php } ?>
+
+<div class="page-break"></div>
+
+<div align='center'>
+    <h4>Annexure<br>Details of Outstanding (Lease No:<?= h($lease_number) ?>)</h5>
+
+
+</div>
+
+<!-- =====================================================================
+     STEP 6: DISPLAY TABLE WITH OPTIONAL COLUMNS + TOTAL ROW
+===================================================================== -->
+
+<table border="1" cellpadding="4" cellspacing="0" class="outstanding-table"
+    style="border-collapse:collapse; width:70%; font-size:12px;">
+    <thead>
+        <tr>
+            <th>Year</th>
+            <th>Balance Rent</th>
+
+            <?php if ($hasPenalty): ?>
+            <th>Balance Penalty</th>
+            <?php endif; ?>
+
+            <?php if ($hasPremium): ?>
+            <th>Balance Premium</th>
+            <?php endif; ?>
+
+            <th>Total Outstanding</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <?php if (empty($finalRows)): ?>
+        <tr>
+            <td colspan="<?= 3 + ($hasPenalty?1:0) + ($hasPremium?1:0) ?>" style="text-align:center;">No Outstanding
+            </td>
+        </tr>
+
+        <?php else: foreach ($finalRows as $row): ?>
+        <tr>
+            <td><?= $row['year'] ?></td>
+            <td style="text-align:right;">
+                <?php echo number_format($row['rent'], 2);  $current_year_rent=$row['rent']; ?>
+            </td>
+
+            <?php if ($hasPenalty): ?>
+            <td style="text-align:right;"><?= number_format($row['pen'], 2) ?></td>
+            <?php endif; ?>
+
+            <?php if ($hasPremium): ?>
+            <td style="text-align:right;"><?= number_format($row['prem'], 2) ?></td>
+            <?php endif; ?>
+
+            <td style="text-align:right;"><?= number_format($row['total'], 2) ?></td>
+        </tr>
+        <?php endforeach; ?>
+
+        <!-- TOTAL ROW -->
+        <tr style="font-weight:bold; background:#f8f8f8;">
+            <td>Total</td>
+            <td style="text-align:right;"><?= number_format($totalRent, 2) ?></td>
+
+            <?php if ($hasPenalty): ?>
+            <td style="text-align:right;"><?= number_format($totalPen, 2) ?></td>
+            <?php endif; ?>
+
+            <?php if ($hasPremium): ?>
+            <td style="text-align:right;"><?= number_format($totalPrem, 2) ?></td>
+            <?php endif; ?>
+
+            <td style="text-align:right;"><?= number_format($totalAll, 2) ?></td>
+        </tr>
+
+        <?php endif; ?>
+    </tbody>
+</table>

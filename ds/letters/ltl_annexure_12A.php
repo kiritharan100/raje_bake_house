@@ -49,6 +49,7 @@ if ($md5 !== '') {
                             mysqli_stmt_close($st3);
                         }
                         if ($lease) { $lease_number = $lease['lease_number'] ?? '-'; }
+                        $file_number = $lease['file_number'] ?? '-';
                     }
                     mysqli_stmt_close($st2);
                 }
@@ -171,7 +172,7 @@ if($_REQUEST['language'] == "TA"){
 </div> -->
     <br><br>
     <p class="bold">இணைப்பு - 12A</p>
-    எமது இல. ..................................... <br>
+    எமது இல. <?=  $file_number ?> <br>
     <br><br><br>
     <p>
         <?= h($benName) ?><br>
@@ -265,9 +266,7 @@ if($_REQUEST['language'] == "TA"){
 <body>
 
     <div class="right">
-        මාගේ අංකය ............................. <br>
-        ....................................................... <br>
-        ....................................................... <br>
+        මාගේ අංකය <?=  $file_number ?> <br> <br>
         දිනය : .........................................
     </div>
 

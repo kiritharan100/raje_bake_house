@@ -193,84 +193,122 @@ $amount_words = amount_to_words($total_outstanding);
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8" />
-<title>Lease Recovery Letter</title>
-<style>
-  body { font-family: Arial, sans-serif; font-size:14px; line-height:1.55; color:#111; margin:100px 50px 30px 50px; }
-  .top-meta { font-size:12px; margin-bottom:18px; }
-  h1 { font-size:16px; margin:0 0 6px; }
-  .section { margin-top:14px; }
-  .label { font-weight:600; }
-  .bank-block { margin-top:18px; }
-  .underline { text-decoration: underline; }
-  p { text-align: justify; line-height:1.65; }
-  @media print {
-    body { font-size:14px; margin-top:100px; }
-  }
-</style>
+    <meta charset="utf-8" />
+    <title>Lease Recovery Letter</title>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        line-height: 1.55;
+        color: #111;
+        margin: 100px 50px 30px 50px;
+    }
+
+    .top-meta {
+        font-size: 12px;
+        margin-bottom: 18px;
+    }
+
+    h1 {
+        font-size: 16px;
+        margin: 0 0 6px;
+    }
+
+    .section {
+        margin-top: 14px;
+    }
+
+    .label {
+        font-weight: 600;
+    }
+
+    .bank-block {
+        margin-top: 18px;
+    }
+
+    .underline {
+        text-decoration: underline;
+    }
+
+    p {
+        text-align: justify;
+        line-height: 1.65;
+    }
+
+    @media print {
+        body {
+            font-size: 14px;
+            margin-top: 100px;
+        }
+    }
+    </style>
 </head>
+
 <body>
-<div class="top-meta"><br><br><br>
-  <span>File No: <?= h($lease['file_number'] ?? '-') ?></span>
-  <span style="float:right;">Date: <?= h($today_disp) ?></span>
-  <div style="clear:both"></div>
-</div>
-
-<?php if ($error): ?>
-  <div style="color:#c00;font-weight:600;">Error: <?= h($error) ?></div>
-<?php else: ?>
-
-  <div class="section">
-    <div><?= h($ben['name']) ?></div>
-    <div><?= h($ben['address']) ?></div>
-
-    <div>
-      <span class="label">
-        Annual Lease Rental Payment Rs. <?= number_format($total_outstanding,2) ?>
-      </span>
-      <br>
-      <!-- <small>(Outstanding as at <?= date('d/m/Y', strtotime($outstanding_date)) ?>)</small> -->
+    <div class="top-meta"><br><br><br>
+        <span>File No: <?= h($lease['file_number'] ?? '-') ?></span>
+        <span style="float:right;">Date: <?= h($today_disp) ?></span>
+        <div style="clear:both"></div>
     </div>
-    <hr>
-  </div>
 
-  <div class="section">
-    <p>
-      This is to kindly inform you that to pay the amount of
-      Rs. <?= number_format($total_outstanding,2) ?>
-      (<?= h($amount_words) ?>) as lease rental with arrears
-      to the below mentioned bank account number.
-      <strong>(details annexed herewith)</strong>
-    </p>
-  </div>
+    <?php if ($error): ?>
+    <div style="color:#c00;font-weight:600;">Error: <?= h($error) ?></div>
+    <?php else: ?>
 
-  <div class="bank-block">
-    <p><span class="label">Bank Name:</span> <?= h($client['bank_and_branch'] ?? 'N/A') ?></p>
-    <p><span class="label">Account Name:</span> <?= h($client['account_name'] ?? 'N/A') ?></p>
-    <p><span class="label">A/C No:</span> <?= h($client['account_number'] ?? 'N/A') ?></p>
-  </div>
+    <div class="section">
+        <div><?= h($ben['name']) ?></div>
+        <div><?= h($ben['address']) ?></div>
 
-  <div class="section">
-    <p>Further you are verified to send the paid slips to the email ID mentioned below.</p>
-    <p>Email: <?= h($client['client_email'] ?? '') ?></p>
-  </div>
+        <div>
+            <span class="label">
+                Annual Lease Rental Payment Rs. <?= number_format($total_outstanding,2) ?>
+            </span>
+            <br>
+            <!-- <small>(Outstanding as at <?= date('d/m/Y', strtotime($outstanding_date)) ?>)</small> -->
+        </div>
+        <hr>
+    </div>
 
-  <div class="section" style="margin-top:60px;">
-    <p>Thanking you in advance for your prompt action.</p>
-  </div>
+    <div class="section">
+        <p>
+            This is to kindly inform you that to pay the amount of
+            Rs. <?= number_format($total_outstanding,2) ?>
+            (<?= h($amount_words) ?>) as lease rental with arrears
+            to the below mentioned bank account number.
+            <strong>(details annexed herewith)</strong>
+        </p>
+    </div>
 
-  <div class="section" style="margin-top:80px;">
-    <p>Divisional Secretary<br><?= h($client['client_name'] ?? '') ?></p>
-  </div>
+    <div class="bank-block">
+        <p><span class="label">Bank Name:</span> <?= h($client['bank_and_branch'] ?? 'N/A') ?></p>
+        <p><span class="label">Account Name:</span> <?= h($client['account_name'] ?? 'N/A') ?></p>
+        <p><span class="label">A/C No:</span> <?= h($client['account_number'] ?? 'N/A') ?></p>
+    </div>
 
-<?php endif; ?>
+    <div class="section">
+        <p>Further you are verified to send the paid slips to the email ID mentioned below.</p>
+        <p>Email: <?= h($client['client_email'] ?? '') ?></p>
+    </div>
+
+    <div class="section" style="margin-top:60px;">
+        <p>Thanking you in advance for your prompt action.</p>
+    </div>
+
+    <div class="section" style="margin-top:80px;">
+        <p>Divisional Secretary<br><?= h($client['client_name'] ?? '') ?></p>
+    </div>
+
+    <?php endif; ?>
 </body>
 
 <script>
-  window.addEventListener('load', function(){
-    try { window.print(); } catch (e) {}
-  });
+window.addEventListener('load', function() {
+    try {
+        window.print();
+    } catch (e) {}
+});
 </script>
 
 </html>
