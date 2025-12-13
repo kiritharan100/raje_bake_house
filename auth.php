@@ -1,6 +1,6 @@
 <?php 
  
- $conn1 = new mysqli("localhost", "root", "", "land_administration");
+ $conn1 = new mysqli("localhost", "root", "", "raje_bake_house");
 // $conn1 = $con = new mysqli("localhost", "trincomp_kiri", "kiritharan100@gmail.com", "trincomp_am_amparampcs");
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();

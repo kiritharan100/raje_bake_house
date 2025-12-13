@@ -1,5 +1,5 @@
 <?php
-$con = $conn = new mysqli("localhost", "root", "", "land_administration");
+$con = $conn = new mysqli("localhost", "root", "", "raje_bake_house");
 // $conn = $con = new mysqli("localhost", "trincomp_kiri", "kiritharan100@gmail.com", "trincomp_am_amparampcs");
 mysqli_set_charset($con, "utf8mb4");
 /* check connection */
