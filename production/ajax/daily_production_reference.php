@@ -17,7 +17,7 @@ $sql = "SELECT DISTINCT p.p_id, p.product_name, p.batch_quantity, p.current_pric
         FROM production_product p
         WHERE p.status IN ('1')
            OR p.p_id IN (SELECT DISTINCT product_id FROM production_daily_production)
-        ORDER BY p.product_name ASC";
+        ORDER BY p.order_no ASC, p.product_name ASC";
 $res = mysqli_query($con, $sql);
 if (!$res) {
     respond(false, 'Database error: ' . mysqli_error($con));
@@ -32,7 +32,7 @@ $matsql = "SELECT DISTINCT m.id, m.material_name, m.mesurement, m.current_price
            FROM production_material m
            WHERE m.status IN ('0','1')
               OR m.id IN (SELECT DISTINCT material_id FROM production_daily_material_usage)
-           ORDER BY m.material_name ASC";
+           ORDER BY m.id ASC";
 $matres = mysqli_query($con, $matsql);
 if (!$matres) {
     respond(false, 'Database error: ' . mysqli_error($con));

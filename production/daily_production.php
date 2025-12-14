@@ -1,4 +1,13 @@
-<?php include 'header.php'; ?>
+<?php
+include 'header.php';
+// Date filter defaults (last 30 days) with GET override
+$filterFrom = isset($_GET['from']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['from'])
+    ? $_GET['from']
+    : date('Y-m-d', strtotime('-29 days'));
+$filterTo = isset($_GET['to']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['to'])
+    ? $_GET['to']
+    : date('Y-m-d');
+?>
 
 <div class="content-wrapper">
     <div class="container-fluid">
@@ -17,7 +26,18 @@
             <div class="col-sm-12">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="m-0">Daily Records</h5>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h5 class="m-0">Daily Records</h5>
+                            <form id="filterForm" class="form-inline">
+                                <label class="mr-2">From</label>
+                                <input type="date" class="form-control form-control-sm mr-2" id="filterFrom" name="from" value="<?php echo htmlspecialchars($filterFrom); ?>">
+                                <label class="mr-2">To</label>
+                                <input type="date" class="form-control form-control-sm mr-2" id="filterTo" name="to" value="<?php echo htmlspecialchars($filterTo); ?>">
+                                <button type="submit" class="btn btn-sm btn-primary">Apply</button>
+                                <a class="btn btn-sm btn-secondary ml-2" id="btnItemWise" target="_blank">Item Wise Sales</a>
+                                <a class="btn btn-sm btn-secondary ml-2" id="btnMaterialSupply" target="_blank">Material Supply</a>
+                            </form>
+                        </div>
                     </div>
                     <div class="card-block">
                         <div class="table-responsive">
@@ -25,12 +45,28 @@
                                 <thead>
                                     <tr>
                                         <th width="120">Date</th>
-                                        <th>Material Supplied Value</th>
-                                        <th>Value as per Sales Price</th>
-                                        <th width="100" class="text-center">Actions</th>
+                                        <th>Sales</th>
+                                        <th>Material Supplied</th>
+                                        <th>Overhead Cost</th>
+                                        <th>Total Cost</th>
+                                        <th>Profit</th>
+                                        <th>Profit %</th>
+                                        <th width="160" class="text-center">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
+                                <tfoot>
+                                    <tr>
+        <th>Total</th>
+        <th class="text-right" id="foot-sales"></th>
+        <th class="text-right" id="foot-material"></th>
+        <th class="text-right" id="foot-overhead"></th>
+        <th class="text-right" id="foot-totalcost"></th>
+        <th class="text-right" id="foot-profit"></th>
+        <th class="text-center" id="foot-profitpct"></th>
+        <th></th>
+    </tr>
+                                </tfoot>
                             </table>
                         </div>
                     </div>
@@ -47,14 +83,13 @@
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <form id="dailyForm" novalidate>
-                <div class="modal-header">
+                <div class="modal-header py-2" style="height: 50px;">
                     <h5 class="modal-title" id="dailyModalLabel">Add Daily Production</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="editDateFlag" value="0">
+
                     <ul class="nav nav-tabs" role="tablist">
                         <li class="nav-item">
                             <a class="nav-link active" data-toggle="tab" href="#tab-products" role="tab">Products</a>
@@ -63,26 +98,31 @@
                             <a class="nav-link" data-toggle="tab" href="#tab-materials" role="tab">Materials</a>
                         </li>
                     </ul>
+                    <div class="form-row mb-3">
+                        <div class="col-md-4">
+
+                            <input type="date" style='height: 30px;' class="form-control" id="prodDate" name="prod_date"
+                                required>
+                        </div>
+                    </div>
+
+
                     <div class="tab-content pt-3">
                         <div class="tab-pane active" id="tab-products" role="tabpanel">
-                            <div class="form-row mb-3">
-                                <div class="col-md-4">
-                                    <label for="prodDate">Date</label>
-                                    <input type="date" class="form-control" id="prodDate" name="prod_date" required>
-                                </div>
-                            </div>
                             <div class="table-responsive">
                                 <table class="table table-bordered" id="productsTable">
                                     <thead>
                                         <tr>
-                                            <th>Product</th>
-                                            <th width="140">Sales Price</th>
-                                            <th width="160">No of Production</th>
+                                            <th width="140">Product</th>
+                                            <th width="120">Sales Price</th>
+                                            <th width="120">No of Production</th>
+                                            <th width="100">Return Qty</th>
+                                            <th width="130">Sales Qty</th>
                                         </tr>
                                     </thead>
                                     <tbody id="productRows">
                                         <tr>
-                                            <td colspan="3" class="text-center">Loading...</td>
+                                            <td colspan="5" class="text-center">Loading...</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -96,8 +136,8 @@
                                 <table class="table table-bordered" id="materialsTable">
                                     <thead>
                                         <tr>
-                                            <th>Material</th>
-                                            <th width="120">Measurement</th>
+                                            <th width="170">Material</th>
+                                            <th width="80">Unit</th>
                                             <th width="140">Current Price</th>
                                             <th width="160">System Calculation</th>
                                             <th width="160">Actual Material Used</th>
@@ -129,6 +169,8 @@ let dailyTable = null;
 let refData = null;
 let refPromise = null;
 let allocMap = {};
+let currentFrom = "<?php echo $filterFrom; ?>";
+let currentTo = "<?php echo $filterTo; ?>";
 
 function fetchReference() {
     if (refPromise) return refPromise;
@@ -155,28 +197,39 @@ function renderProducts(existingProducts = {}, fallbackProducts = []) {
     const tbody = $('#productRows');
     tbody.empty();
     if (!refData || !refData.products || refData.products.length === 0) {
-        tbody.append('<tr><td colspan="3" class="text-center">No products found.</td></tr>');
+        tbody.append('<tr><td colspan="5" class="text-center">No products found.</td></tr>');
         return;
     }
     // merge existing + fallback quantities for quick lookup
     const qtyMap = {};
+    const retMap = {};
     Object.keys(existingProducts).forEach(function(k) {
-        qtyMap[k] = existingProducts[k];
+        if (typeof existingProducts[k] === 'object') {
+            qtyMap[k] = existingProducts[k].qty || 0;
+            retMap[k] = existingProducts[k].return_qty || 0;
+        } else {
+            qtyMap[k] = existingProducts[k];
+        }
     });
     (fallbackProducts || []).forEach(function(fp) {
         if (fp && fp.product_id !== undefined && qtyMap[fp.product_id] === undefined) {
             qtyMap[fp.product_id] = fp.quantity;
+            retMap[fp.product_id] = fp.return_qty || 0;
         }
     });
     const rendered = {};
     refData.products.forEach(function(p) {
         const qty = qtyMap[p.p_id] !== undefined ? qtyMap[p.p_id] : '';
+        const ret = retMap[p.p_id] !== undefined ? retMap[p.p_id] : '';
+        const salesQty = (parseFloat(qty || 0) - parseFloat(ret || 0)).toFixed(2);
         rendered[p.p_id] = true;
         tbody.append(`
             <tr class="prod-row" data-product="${p.p_id}" data-batch="${p.batch_quantity}" data-price="${p.sales_price}">
                 <td>${p.product_name}</td>
                 <td class="text-center">${parseFloat(p.sales_price).toFixed(2)}</td>
                 <td><input type="number" class="form-control form-control-sm prod-qty" min="0" step="1" value="${qty}"></td>
+                <td><input type="number" class="form-control form-control-sm ret-qty" min="0" step="1" value="${ret}"></td>
+                <td class="text-center sales-qty">${salesQty}</td>
             </tr>
         `);
     });
@@ -184,6 +237,8 @@ function renderProducts(existingProducts = {}, fallbackProducts = []) {
     fallbackProducts.forEach(function(fp) {
         if (rendered[fp.product_id]) return;
         const qty = qtyMap[fp.product_id] !== undefined ? qtyMap[fp.product_id] : fp.quantity;
+        const ret = retMap[fp.product_id] !== undefined ? retMap[fp.product_id] : (fp.return_qty || 0);
+        const salesQty = (parseFloat(qty || 0) - parseFloat(ret || 0)).toFixed(2);
         const price = fp.sales_price || 0;
         const batch = fp.batch_quantity || 0;
         tbody.append(`
@@ -191,6 +246,8 @@ function renderProducts(existingProducts = {}, fallbackProducts = []) {
                 <td>${fp.product_id}</td>
                 <td class="text-center">${parseFloat(price).toFixed(2)}</td>
                 <td><input type="number" class="form-control form-control-sm prod-qty" min="0" step="1" value="${qty}"></td>
+                <td><input type="number" class="form-control form-control-sm ret-qty" min="0" step="1" value="${ret}"></td>
+                <td class="text-center sales-qty">${salesQty}</td>
             </tr>
         `);
     });
@@ -266,28 +323,53 @@ function recalcMaterials() {
     });
 }
 
-function loadSummary() {
-    $.getJSON('ajax/daily_production_summary.php', function(response) {
+function loadSummary(from = null, to = null) {
+    const params = {
+        _: Date.now()
+    }; // cache-bust
+    if (from) params.from = from;
+    if (to) params.to = to;
+    $.getJSON('ajax/daily_production_summary.php', params, function(response) {
         if (!response.success) {
             Swal.fire('Error', response.message || 'Unable to load daily records.', 'error');
             return;
         }
         const tbody = $('#daily-table tbody');
         tbody.empty();
+        let sumSales = 0, sumMaterial = 0, sumOverhead = 0, sumTotalCost = 0, sumProfit = 0;
         response.data.forEach(function(row) {
+            sumSales += parseFloat(row.sales_value) || 0;
+            sumMaterial += parseFloat(row.material_value) || 0;
+            sumOverhead += parseFloat(row.overhead_value) || 0;
+            sumTotalCost += parseFloat(row.total_cost) || 0;
+            sumProfit += parseFloat(row.profit || (row.sales_value - row.total_cost)) || 0;
             tbody.append(`
                 <tr>
                     <td>${row.date}</td>
-                    <td>${parseFloat(row.material_value).toFixed(2)}</td>
-                    <td>${parseFloat(row.sales_value).toFixed(2)}</td>
+                    <td class="text-right">${parseFloat(row.sales_value).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                    <td class="text-right">${parseFloat(row.material_value).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                    <td class="text-right">${parseFloat(row.overhead_value).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                    <td class="text-right">${parseFloat(row.total_cost).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                    <td class="text-right">${parseFloat(row.profit || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                    <td class="text-center">${parseFloat(row.profit_pct || 0).toFixed(2)}%</td>
                     <td class="text-center">
-                        <button class="btn btn-sm btn-primary edit-daily" data-date="${row.date}"><i class="fa fa-edit"></i></button>
+                        <div class="d-inline-flex">
+                            <button class="btn btn-sm btn-primary edit-daily mr-1" data-date="${row.date}"><i class="fa fa-edit"></i> Edit</button>
+                            <a class="btn btn-sm btn-primary" href="report_daily_detail.php?date=${row.date}" target="_blank">View</a>
+                        </div>
                     </td>
                 </tr>
             `);
         });
+        // set footer totals
+        $('#foot-sales').text(sumSales.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}));
+        $('#foot-material').text(sumMaterial.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}));
+        $('#foot-overhead').text(sumOverhead.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}));
+        $('#foot-totalcost').text(sumTotalCost.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}));
+        $('#foot-profit').text(sumProfit.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}));
+        $('#foot-profitpct').text('-');
         if (dailyTable) {
-            dailyTable.destroy();
+            dailyTable.clear().destroy();
         }
         dailyTable = $('#daily-table').DataTable({
             order: [
@@ -304,9 +386,14 @@ function applyExistingToRows(productList = [], materialList = []) {
     (productList || []).forEach(function(p) {
         if (!p || p.product_id === undefined) return;
         const pid = String(p.product_id);
-        const row = $('.prod-row').filter(function() { return String($(this).data('product')) === pid; });
+        const row = $('.prod-row').filter(function() {
+            return String($(this).data('product')) === pid;
+        });
         if (row.length) {
             row.find('.prod-qty').val(p.quantity);
+            if (p.return_qty !== undefined) {
+                row.find('.ret-qty').val(p.return_qty);
+            }
             if (p.batch_quantity !== undefined) {
                 row.attr('data-batch', p.batch_quantity);
             }
@@ -320,7 +407,9 @@ function applyExistingToRows(productList = [], materialList = []) {
     (materialList || []).forEach(function(m) {
         if (!m || m.material_id === undefined) return;
         const mid = String(m.material_id);
-        const row = $('.mat-row').filter(function() { return String($(this).data('material')) === mid; });
+        const row = $('.mat-row').filter(function() {
+            return String($(this).data('material')) === mid;
+        });
         if (row.length) {
             row.find('.mat-actual').val(m.quantity_used);
             if (m.material_price !== undefined) {
@@ -337,8 +426,24 @@ function openModal(dateValue = '', existingProducts = {}, existingMaterials = {}
     $('#prodDate').prop('readonly', isEdit);
     $('#editDateFlag').val(isEdit ? 1 : 0);
     $('#dailyModalLabel').text(isEdit ? 'Edit Daily Production' : 'Add Daily Production');
-    $('#prodDate').attr('min', today);
     $('#prodDate').val(dateValue || today);
+
+    // Duplicate check on date change/new
+    $('#prodDate').off('change.checkDup').on('change.checkDup', function() {
+        const selectedDate = $(this).val();
+        if (!selectedDate || $('#editDateFlag').val() === '1') return;
+        $.getJSON('ajax/daily_production_detail.php', {
+            date: selectedDate
+        }, function(resp) {
+            if (resp && ((resp.data && ((resp.data.products && resp.data.products.length) || (resp.data
+                        .materials && resp.data.materials.length))) ||
+                    (resp.products && resp.products.length) || (resp.materials && resp.materials.length)
+                )) {
+                Swal.fire('Notice', 'Record already found for this date. Please use Edit.', 'info');
+                $('#dailyModal').modal('hide');
+            }
+        });
+    });
 
     renderProducts(existingProducts, fallbackProducts);
     renderMaterials(existingMaterials, fallbackMaterials);
@@ -349,6 +454,10 @@ function openModal(dateValue = '', existingProducts = {}, existingMaterials = {}
         const pid = String($(this).data('product'));
         if (existingProducts[pid] !== undefined) {
             $(this).find('.prod-qty').val(existingProducts[pid]);
+        }
+        if (existingProducts[pid] && typeof existingProducts[pid] === 'object' && existingProducts[pid]
+            .return_qty !== undefined) {
+            $(this).find('.ret-qty').val(existingProducts[pid].return_qty);
         }
     });
     $('.mat-row').each(function() {
@@ -364,7 +473,7 @@ function openModal(dateValue = '', existingProducts = {}, existingMaterials = {}
 
 $(document).ready(function() {
     fetchReference().then(function() {
-        loadSummary();
+        loadSummary(currentFrom, currentTo);
     });
 
     $('#addDailyBtn').on('click', function() {
@@ -373,8 +482,56 @@ $(document).ready(function() {
         });
     });
 
-    $('#productRows').on('input', '.prod-qty', function() {
+    // Use GET navigation for filter (so query params reflect range)
+    $('#filterForm').on('submit', function(e) {
+        e.preventDefault();
+        const from = $('#filterFrom').val();
+        const to = $('#filterTo').val();
+        const url = new URL(window.location.href);
+        if (from) { url.searchParams.set('from', from); } else { url.searchParams.delete('from'); }
+        if (to) { url.searchParams.set('to', to); } else { url.searchParams.delete('to'); }
+        window.location = url.toString();
+    });
+
+    function updateReportLinks() {
+        const from = $('#filterFrom').val();
+        const to = $('#filterTo').val();
+        const baseItem = 'report_item_wise_sales.php';
+        const baseSupply = 'report_material_supply.php';
+        $('#btnItemWise').attr('href', `${baseItem}?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
+        $('#btnMaterialSupply').attr('href', `${baseSupply}?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
+    }
+
+    $('#filterFrom, #filterTo').on('change', updateReportLinks);
+    updateReportLinks();
+
+    function updateSalesRow(row) {
+        const prodQty = parseFloat(row.find('.prod-qty').val()) || 0;
+        const retQty = parseFloat(row.find('.ret-qty').val()) || 0;
+        const sales = prodQty - retQty;
+        row.find('.sales-qty').text(sales.toFixed(2));
+    }
+
+    $('#productRows').on('input', '.prod-qty, .ret-qty', function() {
+        const row = $(this).closest('tr');
+        updateSalesRow(row);
         recalcMaterials();
+    });
+
+    // Enter key moves to next input in modals (products and materials)
+    function focusNextInput($inputs, current) {
+        const idx = $inputs.index(current);
+        if (idx > -1 && idx + 1 < $inputs.length) {
+            $inputs.eq(idx + 1).focus();
+        }
+    }
+
+    $('#overheadForm input, #productRows input, #materialRows input').on('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const $inputs = $(this).closest('form').find('input, select').filter(':visible');
+            focusNextInput($inputs, this);
+        }
     });
 
     $('#nextToMaterials').on('click', function() {
@@ -392,8 +549,10 @@ $(document).ready(function() {
                         'error');
                     return;
                 }
-                const detailProducts = (response.data && response.data.products) ? response.data.products : (response.products || []);
-                const detailMaterials = (response.data && response.data.materials) ? response.data.materials : (response.materials || []);
+                const detailProducts = (response.data && response.data.products) ?
+                    response.data.products : (response.products || []);
+                const detailMaterials = (response.data && response.data.materials) ?
+                    response.data.materials : (response.materials || []);
 
                 const prodMap = {};
                 (detailProducts || []).forEach(function(p) {
@@ -410,19 +569,22 @@ $(document).ready(function() {
                     prodMap,
                     matMap
                 });
-                openModal(date, prodMap, matMap, true, detailProducts || [], detailMaterials || []);
+                openModal(date, prodMap, matMap, true, detailProducts || [],
+                    detailMaterials || []);
                 setTimeout(function() {
                     console.log('After openModal fill', {
                         prodRows: $('.prod-row').map(function() {
                             return {
                                 id: $(this).data('product'),
-                                qty: $(this).find('.prod-qty').val()
+                                qty: $(this).find('.prod-qty')
+                                    .val()
                             };
                         }).get(),
                         matRows: $('.mat-row').map(function() {
                             return {
                                 id: $(this).data('material'),
-                                qty: $(this).find('.mat-actual').val()
+                                qty: $(this).find('.mat-actual')
+                                    .val()
                             };
                         }).get()
                     });
@@ -441,22 +603,18 @@ $(document).ready(function() {
             Swal.fire('Error', 'Date is required.', 'error');
             return;
         }
-        const today = new Date().toISOString().slice(0, 10);
-        if ($('#editDateFlag').val() !== '1' && dateVal < today) {
-            Swal.fire('Error', 'Only today or future dates are allowed.', 'error');
-            return;
-        }
-
         const products = [];
         $('.prod-row').each(function() {
             const pid = $(this).data('product');
             const price = parseFloat($(this).data('price')) || 0;
             const qty = parseFloat($(this).find('.prod-qty').val()) || 0;
+            const ret = parseFloat($(this).find('.ret-qty').val()) || 0;
             if (qty > 0) {
                 products.push({
                     product_id: pid,
                     sales_price: price,
-                    quantity: qty
+                    quantity: qty,
+                    return_qty: ret
                 });
             }
         });
@@ -487,8 +645,10 @@ $(document).ready(function() {
         }, function(response) {
             if (response.success) {
                 $('#dailyModal').modal('hide');
-                Swal.fire('Success', response.message || 'Saved successfully.', 'success');
-                loadSummary();
+                Swal.fire('Success', response.message || 'Saved successfully.', 'success').then(
+                    () => {
+                        location.reload();
+                    });
             } else {
                 Swal.fire('Error', response.message || 'Unable to save.', 'error');
             }

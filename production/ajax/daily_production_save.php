@@ -19,11 +19,7 @@ if (empty($date)) {
     respond(false, 'Date is required.');
 }
 
-// Only allow today or future for new entries (edits can keep past dates)
-$today = date('Y-m-d');
-if (!$is_edit && strtotime($date) < strtotime($today)) {
-    respond(false, 'Only today or future dates are allowed.');
-}
+// Allow past dates; validation handled in duplicate check below
 
 $products_json = isset($_POST['products']) ? $_POST['products'] : '[]';
 $materials_json = isset($_POST['materials']) ? $_POST['materials'] : '[]';
@@ -75,13 +71,14 @@ try {
     }
 
     // Insert products
-    $prodStmt = $con->prepare("INSERT INTO production_daily_production (date, product_id, sales_price, quantity) VALUES (?, ?, ?, ?)");
+$prodStmt = $con->prepare("INSERT INTO production_daily_production (date, product_id, sales_price, quantity, return_qty) VALUES (?, ?, ?, ?, ?)");
     foreach ($products as $p) {
         $pid = intval($p['product_id'] ?? 0);
         $price = floatval($p['sales_price'] ?? 0);
         $qty = floatval($p['quantity'] ?? 0);
+        $ret = floatval($p['return_qty'] ?? 0);
         if ($pid > 0 && $qty > 0) {
-            $prodStmt->bind_param("sidi", $date, $pid, $price, $qty);
+            $prodStmt->bind_param("sidii", $date, $pid, $price, $qty, $ret);
             if (!$prodStmt->execute()) {
                 throw new Exception($prodStmt->error);
             }

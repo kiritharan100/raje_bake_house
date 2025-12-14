@@ -288,6 +288,12 @@ $company_id = $_SESSION['customer'];
                         </a>
                     </li>
 
+                    <li class="<?php $url='manage_overhead.php'; if($url == $current_url){echo "active";}?> treeview">
+                        <a class="waves-effect waves-dark" href="<?php echo $url; ?>">
+                            <i class="fa fa-archive" aria-hidden="true"></i><span> Overhead </span>
+                        </a>
+                    </li>
+
 
 
                     <li class="<?php $url='manage_user.php'; if($url == $current_url){echo "active";}?> treeview">

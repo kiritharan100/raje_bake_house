@@ -17,7 +17,7 @@ if (empty($date)) {
 }
 
 $products = [];
-$ps = $con->prepare("SELECT dp.product_id, dp.sales_price, dp.quantity, COALESCE(pp.batch_quantity, 0) AS batch_quantity
+$ps = $con->prepare("SELECT dp.product_id, dp.sales_price, dp.quantity, dp.return_qty, COALESCE(pp.batch_quantity, 0) AS batch_quantity
                      FROM production_daily_production dp
                      LEFT JOIN production_product pp ON pp.p_id = dp.product_id
                      WHERE dp.date = ?");
