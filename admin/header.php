@@ -268,11 +268,7 @@ $company_id = $_SESSION['customer'];
                         </a>
                     </li>
 
-                    <li class="<?php $url='manage_material.php'; if($url == $current_url){echo "active";}?> treeview">
-                        <a class="waves-effect waves-dark" href="<?php echo $url; ?>">
-                            <i class="fa-solid fa-user"></i><span> Material</span>
-                        </a>
-                    </li>
+
 
 
 

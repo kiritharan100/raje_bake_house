@@ -146,7 +146,7 @@ $company_id = $_SESSION['customer'];
                         <a href="#!" style='font-weight: 800;    font-size: 25px;' data-toggle="dropdown" role="button"
                             aria-haspopup="true" aria-expanded="false"
                             class="dropdown-toggle drop icon-circle drop-image">
-                            <span> <i class="fa fa-user" aria-hidden="true"></i> ADMIN</span>
+                            <span> <i class="fa fa-user" aria-hidden="true"></i> Bake House</span>
                         </a>
 
                     </li>

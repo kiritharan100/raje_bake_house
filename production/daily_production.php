@@ -40,6 +40,15 @@ $filterTo = isset($_GET['to']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['to'
                         </div>
                     </div>
                     <div class="card-block">
+                        <style>
+                        #daily-table tfoot th {
+                            text-align: right;
+                            font-weight: 700;
+                        }
+                        #daily-table tfoot th:first-child { text-align: left; }
+                        #daily-table tfoot th:last-child { text-align: left; }
+                        #daily-table tfoot th:nth-last-child(2) { text-align: center; }
+                        </style>
                         <div class="table-responsive">
                             <table id="daily-table" class="table table-bordered table-striped" style="width:100%;">
                                 <thead>
@@ -56,16 +65,16 @@ $filterTo = isset($_GET['to']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['to'
                                 </thead>
                                 <tbody></tbody>
                                 <tfoot>
-                                    <tr>
-        <th>Total</th>
-        <th class="text-right" id="foot-sales"></th>
-        <th class="text-right" id="foot-material"></th>
-        <th class="text-right" id="foot-overhead"></th>
-        <th class="text-right" id="foot-totalcost"></th>
-        <th class="text-right" id="foot-profit"></th>
-        <th class="text-center" id="foot-profitpct"></th>
-        <th></th>
-    </tr>
+                                    <tr class="font-weight-bold">
+                                        <th>Total</th>
+                                        <th class="text-right" id="foot-sales"></th>
+                                        <th class="text-right" id="foot-material"></th>
+                                        <th class="text-right" id="foot-overhead"></th>
+                                        <th class="text-right" id="foot-totalcost"></th>
+                                        <th class="text-right" id="foot-profit"></th>
+                                        <th class="text-center" id="foot-profitpct"></th>
+                                        <th></th>
+                                    </tr>
                                 </tfoot>
                             </table>
                         </div>
@@ -367,7 +376,7 @@ function loadSummary(from = null, to = null) {
         $('#foot-overhead').text(sumOverhead.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}));
         $('#foot-totalcost').text(sumTotalCost.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}));
         $('#foot-profit').text(sumProfit.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}));
-        $('#foot-profitpct').text('-');
+        $('#foot-profitpct').text('');
         if (dailyTable) {
             dailyTable.clear().destroy();
         }
