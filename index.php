@@ -50,10 +50,10 @@
 
 
 
-                        <a href='ds'>
+                        <a href='production'>
                             <div class="col-sm-3 col-xs-12 waves-effect waves-light">
                                 <div class="grid-material bg-danger" style="opacity: .9;"><img src='img/ds.png'
-                                        width='100px;'><br> Divisional Secretariat</div>
+                                        width='100px;'><br> Bakery</div>
                             </div>
                         </a>
 

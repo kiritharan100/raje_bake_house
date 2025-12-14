@@ -137,14 +137,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['LoginSubmit'])) {
             $_SESSION['user_id'] = $user_id;
             $_SESSION['customer'] = $row['customer'];
             $_SESSION['i_name'] = $row['i_name'];
-            $_SESSION['app_name'] = 'IRCMS';
+            $_SESSION['app_name'] = 'RBH System';
             $_SESSION['company_name'] = $entity;
             $_SESSION['last_token'] = $token;
             $_SESSION['company'] = $entity;
             $_SESSION['vat_reg_no'] = $settings['VAT'];
             $_SESSION['vat_invpice_serial'] = $settings['invoice_prefix'];
             $_SESSION['vat_applicable'] = $vat_client;
-            $_SESSION['address1'] = 'Eastern Province';
+            $_SESSION['address1'] = ' ';
 
             $role_id = (int)$row['role_id'];
             

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 14, 2025 at 02:08 AM
+-- Generation Time: Dec 14, 2025 at 10:00 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -134,7 +134,7 @@ CREATE TABLE `letter_head` (
 --
 
 INSERT INTO `letter_head` (`id`, `entity`, `address`, `email`, `telephone`, `vat_no`, `reg_no`, `invoice_prefix`, `admin_device_approval`, `company_name`, `VAT`, `gm_mobile`, `system_email`, `domain`) VALUES
-(1, 'Department of Land', '', 'E-Mail: ', 'Phone ', '', '', '', 0, 'Department of Land', '', '0', '', ' ');
+(1, 'Raja Bake House', '', 'E-Mail: ', 'Phone ', '', '', '', 0, 'Raja Bake', '', '0', '', ' ');
 
 -- --------------------------------------------------------
 
@@ -218,6 +218,348 @@ CREATE TABLE `manage_user_group` (
 
 INSERT INTO `manage_user_group` (`group_id`, `group_name`, `status`) VALUES
 (1, 'System Admin', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_daily_material_usage`
+--
+
+CREATE TABLE `production_daily_material_usage` (
+  `id` int(11) NOT NULL,
+  `material_id` int(11) NOT NULL,
+  `date` date NOT NULL,
+  `material_price` decimal(10,2) NOT NULL,
+  `quantity_used` decimal(10,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_daily_material_usage`
+--
+
+INSERT INTO `production_daily_material_usage` (`id`, `material_id`, `date`, `material_price`, `quantity_used`) VALUES
+(1, 9, '2025-12-13', 1.82, 12321.00),
+(2, 17, '2025-12-13', 2.20, 213.00),
+(3, 12, '2025-12-13', 1.00, 213.00),
+(11, 9, '2025-12-14', 1.82, 100.00),
+(12, 17, '2025-12-14', 2.20, 100.00);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_daily_production`
+--
+
+CREATE TABLE `production_daily_production` (
+  `id` int(11) NOT NULL,
+  `date` date NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `sales_price` decimal(10,2) NOT NULL,
+  `quantity` decimal(10,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_daily_production`
+--
+
+INSERT INTO `production_daily_production` (`id`, `date`, `product_id`, `sales_price`, `quantity`) VALUES
+(7, '2025-12-13', 22, 1000.00, 123.00),
+(8, '2025-12-13', 16, 200.00, 213213.00),
+(18, '2025-12-14', 22, 1000.00, 12.00),
+(19, '2025-12-14', 16, 200.00, 12.00),
+(20, '2025-12-14', 5, 60.00, 12.00),
+(21, '2025-12-14', 17, 1100.00, 12.00);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_material`
+--
+
+CREATE TABLE `production_material` (
+  `id` int(11) NOT NULL,
+  `material_name` varchar(100) NOT NULL,
+  `mesurement` varchar(10) NOT NULL,
+  `current_price` decimal(10,3) NOT NULL,
+  `status` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_material`
+--
+
+INSERT INTO `production_material` (`id`, `material_name`, `mesurement`, `current_price`, `status`) VALUES
+(3, 'Flour', 'Kg', 200.000, 1),
+(4, 'Suger', 'g', 0.230, 1),
+(5, 'Solt', 'g', 0.500, 1),
+(6, 'Margarin', 'g', 1.100, 1),
+(7, 'Yest', 'g', 1.700, 1),
+(8, 'Egg', 'g', 0.045, 1),
+(9, 'Baking Power', 'g', 1.820, 1),
+(10, 'Essance', 'Ml', 1.400, 1),
+(11, 'Plams', 'g', 1.000, 1),
+(12, 'Creem', 'Ml', 1.000, 1),
+(13, 'Curry', 'g', 0.000, 1),
+(14, 'Saman', 'g', 0.000, 1),
+(15, 'Keels', 'g', 0.000, 1),
+(16, 'Cup', 'g', 0.000, 1),
+(17, 'Coco', 'g', 2.200, 1),
+(18, 'Oil Paper', 'g', 0.020, 1),
+(19, 'Milk', 'g', 2.500, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_material_allocation`
+--
+
+CREATE TABLE `production_material_allocation` (
+  `id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `material_id` int(11) NOT NULL,
+  `unit` decimal(10,3) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_material_allocation`
+--
+
+INSERT INTO `production_material_allocation` (`id`, `product_id`, `material_id`, `unit`) VALUES
+(1, 1, 3, 6.500),
+(3, 1, 5, 130.000),
+(4, 1, 6, 200.000),
+(5, 1, 7, 60.000),
+(6, 2, 3, 6.500),
+(7, 2, 4, 300.000),
+(8, 2, 5, 130.000),
+(9, 2, 6, 200.000),
+(10, 2, 7, 60.000),
+(11, 3, 3, 5.500),
+(12, 3, 4, 250.000),
+(13, 3, 5, 110.000),
+(14, 3, 6, 150.000),
+(15, 3, 7, 75.000),
+(16, 4, 3, 11.000),
+(17, 4, 4, 300.000),
+(18, 4, 5, 200.000),
+(19, 4, 6, 220.000),
+(20, 4, 7, 120.000),
+(21, 5, 3, 10.000),
+(22, 5, 4, 3500.000),
+(23, 5, 5, 100.000),
+(24, 5, 6, 1800.000),
+(25, 5, 7, 150.000),
+(26, 5, 11, 250.000),
+(27, 6, 3, 10.000),
+(28, 6, 4, 1200.000),
+(29, 6, 5, 100.000),
+(30, 6, 6, 1000.000),
+(31, 6, 7, 120.000),
+(32, 7, 3, 5.000),
+(33, 7, 4, 1750.000),
+(34, 7, 5, 50.000),
+(35, 7, 6, 900.000),
+(36, 7, 7, 75.000),
+(37, 7, 12, 10.000),
+(38, 8, 3, 5.000),
+(39, 8, 4, 1850.000),
+(40, 8, 5, 50.000),
+(41, 8, 6, 900.000),
+(42, 8, 7, 75.000),
+(43, 8, 12, 10.000),
+(44, 9, 3, 10.000),
+(45, 9, 4, 1200.000),
+(46, 9, 5, 100.000),
+(47, 9, 6, 1000.000),
+(48, 9, 7, 120.000),
+(49, 10, 3, 10.000),
+(50, 10, 4, 1200.000),
+(51, 10, 5, 100.000),
+(52, 10, 6, 1000.000),
+(53, 10, 7, 120.000),
+(54, 11, 3, 10.000),
+(55, 11, 4, 1200.000),
+(56, 11, 5, 100.000),
+(57, 11, 6, 1000.000),
+(58, 11, 7, 120.000),
+(59, 12, 3, 10.000),
+(60, 12, 4, 1200.000),
+(61, 12, 5, 100.000),
+(62, 12, 6, 1000.000),
+(63, 12, 7, 120.000),
+(64, 13, 3, 10.000),
+(65, 13, 4, 1700.000),
+(66, 13, 5, 100.000),
+(67, 13, 6, 1000.000),
+(68, 13, 7, 120.000),
+(69, 14, 3, 2.750),
+(70, 14, 4, 450.000),
+(71, 14, 5, 30.000),
+(72, 14, 6, 200.000),
+(73, 14, 7, 40.000),
+(74, 14, 8, 6.000),
+(75, 14, 10, 15.000),
+(76, 14, 12, 10.000),
+(77, 15, 3, 2.750),
+(78, 15, 4, 800.000),
+(79, 15, 5, 30.000),
+(80, 15, 6, 200.000),
+(81, 15, 7, 40.000),
+(82, 15, 8, 6.000),
+(83, 15, 10, 15.000),
+(88, 17, 3, 3.500),
+(89, 17, 4, 3500.000),
+(90, 17, 6, 3500.000),
+(91, 17, 8, 60.000),
+(92, 17, 10, 15.000),
+(93, 18, 3, 3.000),
+(94, 18, 4, 2500.000),
+(95, 18, 6, 4000.000),
+(96, 18, 10, 15.000),
+(97, 19, 3, 1.500),
+(98, 19, 4, 1500.000),
+(99, 19, 6, 1500.000),
+(100, 19, 8, 30.000),
+(101, 19, 10, 15.000),
+(102, 19, 12, 550.000),
+(103, 20, 3, 1.000),
+(104, 20, 4, 1000.000),
+(105, 20, 6, 1000.000),
+(106, 20, 8, 20.000),
+(107, 20, 10, 10.000),
+(108, 21, 3, 7.000),
+(109, 21, 4, 250.000),
+(110, 21, 5, 140.000),
+(111, 21, 6, 100.000),
+(112, 21, 7, 40.000),
+(113, 22, 3, 5.000),
+(114, 22, 4, 500.000),
+(115, 22, 5, 50.000),
+(116, 22, 6, 500.000),
+(117, 22, 7, 50.000),
+(118, 23, 3, 5.500),
+(119, 23, 4, 250.000),
+(120, 23, 5, 110.000),
+(121, 23, 6, 150.000),
+(122, 23, 7, 75.000),
+(123, 24, 3, 2.000),
+(124, 24, 4, 1500.000),
+(125, 24, 6, 250.000),
+(126, 24, 12, 10.000),
+(127, 26, 3, 5.000),
+(128, 26, 4, 100.000),
+(129, 26, 5, 100.000),
+(130, 26, 6, 250.000),
+(131, 27, 3, 5.000),
+(132, 27, 4, 100.000),
+(133, 27, 5, 100.000),
+(134, 27, 6, 250.000),
+(135, 28, 3, 5.000),
+(136, 28, 4, 100.000),
+(137, 28, 5, 100.000),
+(138, 28, 6, 250.000),
+(139, 28, 8, 75.000),
+(140, 29, 3, 10.000),
+(141, 29, 4, 150.000),
+(142, 29, 5, 200.000),
+(143, 29, 6, 400.000),
+(144, 30, 3, 10.000),
+(145, 30, 4, 150.000),
+(146, 30, 5, 200.000),
+(147, 30, 6, 400.000),
+(148, 31, 3, 10.000),
+(149, 31, 4, 150.000),
+(150, 31, 5, 200.000),
+(151, 31, 6, 400.000),
+(152, 31, 8, 135.000),
+(153, 32, 3, 10.000),
+(154, 32, 4, 150.000),
+(155, 32, 5, 200.000),
+(156, 32, 6, 400.000),
+(157, 33, 3, 10.000),
+(158, 33, 4, 150.000),
+(159, 33, 5, 200.000),
+(160, 33, 6, 400.000),
+(161, 34, 3, 10.000),
+(162, 34, 4, 150.000),
+(163, 34, 5, 200.000),
+(164, 34, 6, 400.000),
+(165, 35, 3, 10.000),
+(166, 35, 4, 150.000),
+(167, 35, 5, 200.000),
+(168, 35, 6, 400.000),
+(169, 35, 8, 135.000),
+(170, 36, 3, 10.000),
+(171, 36, 4, 150.000),
+(172, 36, 5, 200.000),
+(173, 36, 6, 400.000),
+(174, 37, 3, 30.000),
+(175, 37, 4, 300.000),
+(176, 37, 5, 300.000),
+(177, 1, 4, 300.000),
+(178, 16, 17, 550.000),
+(179, 16, 12, 100.000),
+(180, 16, 3, 0.180),
+(181, 16, 6, 250.000),
+(182, 16, 4, 500.000);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_product`
+--
+
+CREATE TABLE `production_product` (
+  `p_id` int(11) NOT NULL,
+  `product_name` varchar(100) NOT NULL,
+  `current_price` decimal(10,2) NOT NULL,
+  `product_category` varchar(50) NOT NULL,
+  `batch_quantity` int(11) NOT NULL,
+  `status` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_product`
+--
+
+INSERT INTO `production_product` (`p_id`, `product_name`, `current_price`, `product_category`, `batch_quantity`, `status`) VALUES
+(1, 'Slice Bread', 200.00, 'Bakery Items', 18, 1),
+(2, 'L Bread', 130.00, 'Bakery Items', 20, 1),
+(3, 'S Bread', 70.00, 'Bakery Items', 30, 1),
+(4, 'Rost Bread', 60.00, 'Bakery Items', 120, 1),
+(5, 'Bun', 60.00, 'Bakery Items', 220, 1),
+(6, 'Curry Bun', 80.00, 'Bakery Items', 200, 1),
+(7, 'Creem Bun', 80.00, 'Bakery Items', 110, 1),
+(8, 'Jam Bun', 80.00, 'Bakery Items', 111, 1),
+(9, 'S S Bun', 80.00, 'Bakery Items', 200, 1),
+(10, 'Saman Bun', 80.00, 'Bakery Items', 200, 1),
+(11, 'Egg Bun', 100.00, 'Bakery Items', 200, 1),
+(12, 'Keels Bun', 80.00, 'Bakery Items', 200, 1),
+(13, 'Roll Bun', 60.00, 'Bakery Items', 200, 1),
+(14, 'Donad', 130.00, 'Bakery Items', 72, 1),
+(15, 'T Vadai', 60.00, 'Bakery Items', 72, 1),
+(16, 'Browni', 200.00, 'Bakery Items', 30, 1),
+(17, 'Butter Cake', 1100.00, 'Bakery Items', 12, 1),
+(18, 'Dates Cake', 1100.00, 'Bakery Items', 12, 1),
+(19, 'Layer Cake', 1200.00, 'Bakery Items', 6, 1),
+(20, 'Sponch', 60.00, 'Bakery Items', 72, 1),
+(21, 'Rusk', 1000.00, 'Bakery Items', 65, 1),
+(22, 'Baby Rusk', 1000.00, 'Bakery Items', 60, 1),
+(23, 'Butter Rusk', 1000.00, 'Bakery Items', 20, 1),
+(24, 'Ganakkatha L', 40.00, 'Bakery Items', 96, 1),
+(25, 'Ganakkatha S', 20.00, 'Bakery Items', 192, 1),
+(26, 'Patties Veg', 40.00, 'Short dish', 300, 1),
+(27, 'Patties Saman', 60.00, 'Short dish', 300, 1),
+(28, 'Patties Egg', 60.00, 'Short dish', 300, 1),
+(29, 'Rolls Veg', 60.00, 'Short dish', 400, 1),
+(30, 'Rolls Saman', 80.00, 'Short dish', 400, 1),
+(31, 'Rolls Egg', 80.00, 'Short dish', 400, 1),
+(32, 'Rolls Chicken', 100.00, 'Short dish', 400, 1),
+(33, 'Samosa Veg', 60.00, 'Short dish', 400, 1),
+(34, 'Samosa Saman', 80.00, 'Short dish', 400, 1),
+(35, 'Samosa Egg', 80.00, 'Short dish', 400, 1),
+(36, 'Samosa Chicken', 100.00, 'Short dish', 400, 1),
+(37, 'Rotti', 400.00, 'Short dish', 50, 1);
 
 -- --------------------------------------------------------
 
@@ -313,7 +655,7 @@ CREATE TABLE `user_license` (
 
 INSERT INTO `user_license` (`usr_id`, `customer`, `username`, `mobile_no`, `role_id`, `password`, `user_rights`, `account_status`, `i_name`, `nic`, `company`, `token`, `dr_token`, `last_log_in`, `last_token`, `material`, `accounts`, `store`, `admin`, `report`, `opd`, `ip`) VALUES
 (1, 0, '0740888501', '', 1, '$2y$10$nY48qthOlivF5rw0cWRZ2.PgsKMHmkFzKmaDjueMVuqcRBS8cu4X.', '', 1, 'Sys Admin', '', '', 'Expired', '3035', '2025-12-13 22:23:36', '255237bfc367574bf914f98b7066ac767c65bc461c3845639daba5d2d4b7b1fb', 0, 1, 1, 1, 0, 0, 0),
-(109, 0, '0770888501', '0770888501', 1, '$2y$10$fZMpMcCgrFXiQHb16FDVZurTdN.PEKCiuOU80Nyx79XSzbpPLrFfy', '', 1, 'Kiritharan', '893121', '', 'Expired', '6987', '2025-12-14 06:24:56', '0b3e9202c49c6faff69a500fabd43fd6657e5d8cdaa1c6dbf9dc7a6adc896ff9', 0, 1, 1, 1, 0, 0, 0);
+(109, 0, '0770888501', '0770888501', 1, '$2y$10$fZMpMcCgrFXiQHb16FDVZurTdN.PEKCiuOU80Nyx79XSzbpPLrFfy', '', 1, 'Kiritharan', '893121', '', 'Expired', '6987', '2025-12-14 12:15:16', 'b86759baf8a9dd276468d9f18a7975f2466e51ce91b6ba8868c0501422d66094', 0, 1, 1, 1, 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -600,7 +942,33 @@ INSERT INTO `user_log` (`id`, `ben_id`, `usr_id`, `module`, `location`, `action`
 (228, NULL, 109, 0, 0, 'Login', 'Login from ::1', '2025-12-13 22:25:42'),
 (229, NULL, 109, 0, 0, 'Login', 'Login from ::1', '2025-12-13 22:26:05'),
 (230, NULL, 109, 0, 0, 'Login', 'Login from ::1', '2025-12-13 22:26:52'),
-(231, NULL, 109, 0, 0, 'Login', 'Login from ::1', '2025-12-14 06:24:56');
+(231, NULL, 109, 0, 0, 'Login', 'Login from ::1', '2025-12-14 06:24:56'),
+(232, NULL, 109, 0, 2, 'Created', 'Material ID: 0 - Suger', '2025-12-14 07:33:36'),
+(233, NULL, 109, 0, 2, 'Created', 'Product ID: 1 - Bun', '2025-12-14 08:46:51'),
+(234, NULL, 109, 0, 2, 'Updated', 'Product ID: 1 - Bun', '2025-12-14 08:46:58'),
+(235, NULL, 109, 0, 2, 'Inactivated', 'Product ID: 1', '2025-12-14 08:47:06'),
+(236, NULL, 109, 0, 2, 'Material Allocation', 'Product ID: 5, Allocated materials: 1', '2025-12-14 09:31:13'),
+(237, NULL, 109, 0, 2, 'Material Allocation', 'Product ID: 16, Allocated materials: 5', '2025-12-14 10:18:39'),
+(238, NULL, 109, 0, 0, 'Login', 'Login from ::1', '2025-12-14 12:15:16'),
+(239, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 12:54:18'),
+(240, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 12:55:44'),
+(241, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 13:18:40'),
+(242, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 13:19:28'),
+(243, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 13:19:39'),
+(244, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 13:20:14'),
+(245, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 13:28:57'),
+(246, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 13:35:44'),
+(247, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 13:38:25'),
+(248, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 13:54:14'),
+(249, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 13:59:18'),
+(250, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 13:59:45'),
+(251, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 14:00:10'),
+(252, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 14:00:22'),
+(253, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 14:02:12'),
+(254, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 14:02:27'),
+(255, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 14:13:18'),
+(256, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 14:13:31'),
+(257, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 14:20:42');
 
 --
 -- Indexes for dumped tables
@@ -635,6 +1003,36 @@ ALTER TABLE `manage_activities`
 --
 ALTER TABLE `manage_user_group`
   ADD PRIMARY KEY (`group_id`);
+
+--
+-- Indexes for table `production_daily_material_usage`
+--
+ALTER TABLE `production_daily_material_usage`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `production_daily_production`
+--
+ALTER TABLE `production_daily_production`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `production_material`
+--
+ALTER TABLE `production_material`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `production_material_allocation`
+--
+ALTER TABLE `production_material_allocation`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `production_product`
+--
+ALTER TABLE `production_product`
+  ADD PRIMARY KEY (`p_id`);
 
 --
 -- Indexes for table `user_device`
@@ -695,6 +1093,36 @@ ALTER TABLE `manage_user_group`
   MODIFY `group_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
+-- AUTO_INCREMENT for table `production_daily_material_usage`
+--
+ALTER TABLE `production_daily_material_usage`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT for table `production_daily_production`
+--
+ALTER TABLE `production_daily_production`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+
+--
+-- AUTO_INCREMENT for table `production_material`
+--
+ALTER TABLE `production_material`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+
+--
+-- AUTO_INCREMENT for table `production_material_allocation`
+--
+ALTER TABLE `production_material_allocation`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=183;
+
+--
+-- AUTO_INCREMENT for table `production_product`
+--
+ALTER TABLE `production_product`
+  MODIFY `p_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+
+--
 -- AUTO_INCREMENT for table `user_device`
 --
 ALTER TABLE `user_device`
@@ -716,7 +1144,7 @@ ALTER TABLE `user_location`
 -- AUTO_INCREMENT for table `user_log`
 --
 ALTER TABLE `user_log`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=232;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=258;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

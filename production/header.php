@@ -267,18 +267,28 @@ $company_id = $_SESSION['customer'];
                             <i class="fa fa-home"></i><span> Dashboard</span>
                         </a>
                     </li>
-
-                    <li class="<?php $url='manage_material.php'; if($url == $current_url){echo "active";}?> treeview">
+                    <li class="<?php $url='daily_production.php'; if($url == $current_url){echo "active";}?> treeview">
                         <a class="waves-effect waves-dark" href="<?php echo $url; ?>">
-                            <i class="fa-solid fa-user"></i><span> Material</span>
+                            <i class="fa fa-cube" aria-hidden="true"></i><span> Daily Production</span>
                         </a>
                     </li>
+
+
 
                     <li class="<?php $url='product_mange.php'; if($url == $current_url){echo "active";}?> treeview">
                         <a class="waves-effect waves-dark" href="<?php echo $url; ?>">
-                            <i class="fa-solid fa-user"></i><span> Products</span>
+                            <i class="fa fa-cube" aria-hidden="true"></i><span> Products</span>
                         </a>
                     </li>
+
+
+                    <li class="<?php $url='manage_material.php'; if($url == $current_url){echo "active";}?> treeview">
+                        <a class="waves-effect waves-dark" href="<?php echo $url; ?>">
+                            <i class="fa fa-archive" aria-hidden="true"></i><span> Material</span>
+                        </a>
+                    </li>
+
+
 
                     <li class="<?php $url='manage_user.php'; if($url == $current_url){echo "active";}?> treeview">
                         <a class="waves-effect waves-dark" href="<?php echo $url; ?>">
