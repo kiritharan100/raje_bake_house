@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 14, 2025 at 10:00 AM
+-- Generation Time: Dec 15, 2025 at 05:33 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -20,6 +20,201 @@ SET time_zone = "+00:00";
 --
 -- Database: `raje_bake_house`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `bank_cheque_payment`
+--
+
+CREATE TABLE `bank_cheque_payment` (
+  `chq_id` int(11) NOT NULL,
+  `cheque_no` varchar(30) NOT NULL,
+  `contact_id` int(11) NOT NULL,
+  `issue_date` date NOT NULL,
+  `cheque_date` date NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `status` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `bank_cheque_payment`
+--
+
+INSERT INTO `bank_cheque_payment` (`chq_id`, `cheque_no`, `contact_id`, `issue_date`, `cheque_date`, `amount`, `status`) VALUES
+(1, '5025', 1, '2025-12-15', '2025-12-15', 5000.00, 1),
+(2, '2', 1, '2025-12-15', '2025-12-15', 12.00, 1),
+(3, '5', 1, '2025-12-15', '2026-01-02', 5000005.00, 0),
+(4, '15', 1, '2025-12-12', '2025-12-12', 5000.00, 0),
+(5, 'sar', 1, '2025-12-16', '2025-12-16', 133.00, 1),
+(6, '1212', 1, '2025-12-17', '2025-12-17', 250.00, 1),
+(7, '5000', 2, '2025-12-15', '2026-12-14', 5000000.00, 0),
+(8, '1212', 1, '2025-12-15', '2025-12-31', 58000.00, 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `bank_contact`
+--
+
+CREATE TABLE `bank_contact` (
+  `contact_id` int(11) NOT NULL,
+  `contact_name` varchar(50) NOT NULL,
+  `contact_number` int(11) NOT NULL,
+  `status` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `bank_contact`
+--
+
+INSERT INTO `bank_contact` (`contact_id`, `contact_name`, `contact_number`, `status`) VALUES
+(1, 'Astra', 0, 1),
+(2, 'Me test payee', 0, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `bill_detail`
+--
+
+CREATE TABLE `bill_detail` (
+  `id` int(11) NOT NULL,
+  `bill_id` int(11) NOT NULL,
+  `p_id` int(11) NOT NULL,
+  `quantity` decimal(10,2) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `value` decimal(10,2) NOT NULL,
+  `status` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `bill_detail`
+--
+
+INSERT INTO `bill_detail` (`id`, `bill_id`, `p_id`, `quantity`, `price`, `value`, `status`) VALUES
+(0, 0, 2, 12.00, 130.00, 1560.00, 1),
+(0, 0, 5, 50.00, 60.00, 3000.00, 1),
+(0, 3, 3, 12.00, 70.00, 840.00, 1),
+(0, 4, 3, 13.00, 70.00, 910.00, 1),
+(0, 4, 5, 2.00, 60.00, 120.00, 1),
+(0, 5, 3, 25.00, 70.00, 1750.00, 1),
+(0, 5, 2, 30.00, 130.00, 3900.00, 1),
+(0, 2, 1, 5.00, 200.00, 1000.00, 1),
+(0, 6, 2, 12.00, 500.00, 6000.00, 1),
+(0, 6, 3, 12.00, 70.00, 840.00, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `bill_items`
+--
+
+CREATE TABLE `bill_items` (
+  `p_id` int(11) NOT NULL,
+  `product_name` varchar(100) NOT NULL,
+  `current_price` decimal(10,2) NOT NULL,
+  `product_category` varchar(50) NOT NULL,
+  `status` int(11) NOT NULL,
+  `order_no` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `bill_items`
+--
+
+INSERT INTO `bill_items` (`p_id`, `product_name`, `current_price`, `product_category`, `status`, `order_no`) VALUES
+(1, 'Slice Bread', 200.00, 'Bakery Items', 1, 1),
+(2, 'L Bread', 130.00, 'Bakery Items', 1, 2),
+(3, 'S Bread', 70.00, 'Bakery Items', 1, 3),
+(4, 'Rost Bread', 60.00, 'Bakery Items', 1, 4),
+(5, 'Bun', 60.00, 'Bakery Items', 1, 5),
+(6, 'Curry Bun', 80.00, 'Bakery Items', 1, 6),
+(7, 'Creem Bun', 80.00, 'Bakery Items', 1, 7),
+(8, 'Jam Bun', 80.00, 'Bakery Items', 1, 8),
+(9, 'S S Bun', 80.00, 'Bakery Items', 1, 9),
+(10, 'Saman Bun', 80.00, 'Bakery Items', 1, 10),
+(11, 'Egg Bun', 100.00, 'Bakery Items', 1, 11),
+(12, 'Keels Bun', 80.00, 'Bakery Items', 1, 12),
+(13, 'Roll Bun', 60.00, 'Bakery Items', 1, 13),
+(14, 'Donad', 130.00, 'Bakery Items', 1, 14),
+(15, 'T Vadai', 60.00, 'Bakery Items', 1, 15),
+(16, 'Browni', 200.00, 'Bakery Items', 1, 16),
+(17, 'Butter Cake', 1100.00, 'Bakery Items', 1, 17),
+(18, 'Dates Cake', 1100.00, 'Bakery Items', 1, 18),
+(19, 'Layer Cake', 1200.00, 'Bakery Items', 1, 19),
+(20, 'Sponch', 60.00, 'Bakery Items', 1, 20),
+(21, 'Rusk', 1000.00, 'Bakery Items', 1, 21),
+(22, 'Baby Rusk', 1000.00, 'Bakery Items', 1, 22),
+(23, 'Butter Rusk', 1000.00, 'Bakery Items', 1, 23),
+(24, 'Ganakkatha L', 40.00, 'Bakery Items', 1, 24),
+(25, 'Ganakkatha S', 20.00, 'Bakery Items', 1, 25),
+(26, 'Patties Veg', 40.00, 'Short dish', 1, 26),
+(27, 'Patties Saman', 60.00, 'Short dish', 1, 27),
+(28, 'Patties Egg', 60.00, 'Short dish', 1, 28),
+(29, 'Rolls Veg', 60.00, 'Short dish', 1, 29),
+(30, 'Rolls Saman', 80.00, 'Short dish', 1, 30),
+(31, 'Rolls Egg', 80.00, 'Short dish', 1, 31),
+(32, 'Rolls Chicken', 100.00, 'Short dish', 1, 32),
+(33, 'Samosa Veg', 60.00, 'Short dish', 1, 33),
+(34, 'Samosa Saman', 80.00, 'Short dish', 1, 34),
+(35, 'Samosa Egg', 80.00, 'Short dish', 1, 35),
+(36, 'Samosa Chicken', 100.00, 'Short dish', 1, 36),
+(37, 'Rotti', 400.00, 'Short dish', 1, 37);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `bill_payment`
+--
+
+CREATE TABLE `bill_payment` (
+  `pay_id` int(11) NOT NULL,
+  `bill_id` int(11) NOT NULL,
+  `payment_mode` varchar(25) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `payment_date` date NOT NULL,
+  `status` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `bill_payment`
+--
+
+INSERT INTO `bill_payment` (`pay_id`, `bill_id`, `payment_mode`, `amount`, `payment_date`, `status`) VALUES
+(1, 5, 'Cash', 750.00, '2025-12-15', 0),
+(2, 5, 'Cash', 1000.00, '2025-12-15', 0),
+(3, 5, 'Cash', 5650.00, '2025-12-15', 1),
+(4, 3, 'Cash', 40.00, '2025-12-15', 1),
+(5, 3, 'Cash', 800.00, '2025-12-15', 1),
+(6, 6, 'Bank Deposit', 6840.00, '2025-12-15', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `bill_summary`
+--
+
+CREATE TABLE `bill_summary` (
+  `bill_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `date` date NOT NULL,
+  `bill_no` varchar(12) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `status` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `bill_summary`
+--
+
+INSERT INTO `bill_summary` (`bill_id`, `customer_id`, `date`, `bill_no`, `amount`, `status`) VALUES
+(1, 1, '2025-12-15', '', 1560.00, 1),
+(2, 1, '2024-12-15', '125', 1000.00, 1),
+(3, 2, '2025-12-15', '', 840.00, 1),
+(4, 1, '2025-12-10', '12', 1030.00, 0),
+(5, 2, '2025-12-15', '12', 5650.00, 1),
+(6, 5, '2025-12-15', '123', 6840.00, 1);
 
 -- --------------------------------------------------------
 
@@ -134,7 +329,7 @@ CREATE TABLE `letter_head` (
 --
 
 INSERT INTO `letter_head` (`id`, `entity`, `address`, `email`, `telephone`, `vat_no`, `reg_no`, `invoice_prefix`, `admin_device_approval`, `company_name`, `VAT`, `gm_mobile`, `system_email`, `domain`) VALUES
-(1, 'Raja Bake House', '', 'E-Mail: ', 'Phone ', '', '', '', 0, 'Raja Bake', '', '0', '', ' ');
+(1, 'Raja Bake House', '', 'E-Mail: ', 'Phone ', '', '', '', 0, 'Raja Bake House', '', '0', '', ' ');
 
 -- --------------------------------------------------------
 
@@ -203,6 +398,30 @@ INSERT INTO `manage_activities` (`act_id`, `activity`, `module`, `is_menu`, `act
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `manage_customers`
+--
+
+CREATE TABLE `manage_customers` (
+  `cus_id` int(11) NOT NULL,
+  `customer_name` varchar(100) NOT NULL,
+  `contact_number` varchar(25) NOT NULL,
+  `status` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `manage_customers`
+--
+
+INSERT INTO `manage_customers` (`cus_id`, `customer_name`, `contact_number`, `status`) VALUES
+(1, 'Department of labour', '0770x501', 1),
+(2, 'Departent of  building', '', 1),
+(3, 'test', '12', 0),
+(4, 'kiri', '12', 0),
+(5, 'test23', '23', 1);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `manage_user_group`
 --
 
@@ -238,11 +457,12 @@ CREATE TABLE `production_daily_material_usage` (
 --
 
 INSERT INTO `production_daily_material_usage` (`id`, `material_id`, `date`, `material_price`, `quantity_used`) VALUES
-(1, 9, '2025-12-13', 1.82, 12321.00),
-(2, 17, '2025-12-13', 2.20, 213.00),
-(3, 12, '2025-12-13', 1.00, 213.00),
-(11, 9, '2025-12-14', 1.82, 100.00),
-(12, 17, '2025-12-14', 2.20, 100.00);
+(16, 3, '2025-12-14', 200.00, 17.00),
+(17, 4, '2025-12-14', 0.23, 780.00),
+(18, 5, '2025-12-14', 0.50, 325.00),
+(19, 6, '2025-12-14', 1.10, 500.00),
+(20, 7, '2025-12-14', 1.70, 160.00),
+(21, 3, '2025-12-13', 200.00, 6.00);
 
 -- --------------------------------------------------------
 
@@ -255,20 +475,18 @@ CREATE TABLE `production_daily_production` (
   `date` date NOT NULL,
   `product_id` int(11) NOT NULL,
   `sales_price` decimal(10,2) NOT NULL,
-  `quantity` decimal(10,2) NOT NULL
+  `quantity` decimal(10,2) NOT NULL,
+  `return_qty` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `production_daily_production`
 --
 
-INSERT INTO `production_daily_production` (`id`, `date`, `product_id`, `sales_price`, `quantity`) VALUES
-(7, '2025-12-13', 22, 1000.00, 123.00),
-(8, '2025-12-13', 16, 200.00, 213213.00),
-(18, '2025-12-14', 22, 1000.00, 12.00),
-(19, '2025-12-14', 16, 200.00, 12.00),
-(20, '2025-12-14', 5, 60.00, 12.00),
-(21, '2025-12-14', 17, 1100.00, 12.00);
+INSERT INTO `production_daily_production` (`id`, `date`, `product_id`, `sales_price`, `quantity`, `return_qty`) VALUES
+(5, '2025-12-14', 1, 200.00, 18.00, 1.00),
+(6, '2025-12-14', 2, 130.00, 20.00, 0.00),
+(9, '2025-12-13', 1, 200.00, 15.00, 1.00);
 
 -- --------------------------------------------------------
 
@@ -506,6 +724,26 @@ INSERT INTO `production_material_allocation` (`id`, `product_id`, `material_id`,
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `production_overhead`
+--
+
+CREATE TABLE `production_overhead` (
+  `id` int(11) NOT NULL,
+  `effective_from` date NOT NULL,
+  `over_head` decimal(10,2) NOT NULL,
+  `status` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `production_overhead`
+--
+
+INSERT INTO `production_overhead` (`id`, `effective_from`, `over_head`, `status`) VALUES
+(1, '2025-11-13', 16.00, 1);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `production_product`
 --
 
@@ -515,51 +753,52 @@ CREATE TABLE `production_product` (
   `current_price` decimal(10,2) NOT NULL,
   `product_category` varchar(50) NOT NULL,
   `batch_quantity` int(11) NOT NULL,
-  `status` int(11) NOT NULL
+  `status` int(11) NOT NULL,
+  `order_no` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `production_product`
 --
 
-INSERT INTO `production_product` (`p_id`, `product_name`, `current_price`, `product_category`, `batch_quantity`, `status`) VALUES
-(1, 'Slice Bread', 200.00, 'Bakery Items', 18, 1),
-(2, 'L Bread', 130.00, 'Bakery Items', 20, 1),
-(3, 'S Bread', 70.00, 'Bakery Items', 30, 1),
-(4, 'Rost Bread', 60.00, 'Bakery Items', 120, 1),
-(5, 'Bun', 60.00, 'Bakery Items', 220, 1),
-(6, 'Curry Bun', 80.00, 'Bakery Items', 200, 1),
-(7, 'Creem Bun', 80.00, 'Bakery Items', 110, 1),
-(8, 'Jam Bun', 80.00, 'Bakery Items', 111, 1),
-(9, 'S S Bun', 80.00, 'Bakery Items', 200, 1),
-(10, 'Saman Bun', 80.00, 'Bakery Items', 200, 1),
-(11, 'Egg Bun', 100.00, 'Bakery Items', 200, 1),
-(12, 'Keels Bun', 80.00, 'Bakery Items', 200, 1),
-(13, 'Roll Bun', 60.00, 'Bakery Items', 200, 1),
-(14, 'Donad', 130.00, 'Bakery Items', 72, 1),
-(15, 'T Vadai', 60.00, 'Bakery Items', 72, 1),
-(16, 'Browni', 200.00, 'Bakery Items', 30, 1),
-(17, 'Butter Cake', 1100.00, 'Bakery Items', 12, 1),
-(18, 'Dates Cake', 1100.00, 'Bakery Items', 12, 1),
-(19, 'Layer Cake', 1200.00, 'Bakery Items', 6, 1),
-(20, 'Sponch', 60.00, 'Bakery Items', 72, 1),
-(21, 'Rusk', 1000.00, 'Bakery Items', 65, 1),
-(22, 'Baby Rusk', 1000.00, 'Bakery Items', 60, 1),
-(23, 'Butter Rusk', 1000.00, 'Bakery Items', 20, 1),
-(24, 'Ganakkatha L', 40.00, 'Bakery Items', 96, 1),
-(25, 'Ganakkatha S', 20.00, 'Bakery Items', 192, 1),
-(26, 'Patties Veg', 40.00, 'Short dish', 300, 1),
-(27, 'Patties Saman', 60.00, 'Short dish', 300, 1),
-(28, 'Patties Egg', 60.00, 'Short dish', 300, 1),
-(29, 'Rolls Veg', 60.00, 'Short dish', 400, 1),
-(30, 'Rolls Saman', 80.00, 'Short dish', 400, 1),
-(31, 'Rolls Egg', 80.00, 'Short dish', 400, 1),
-(32, 'Rolls Chicken', 100.00, 'Short dish', 400, 1),
-(33, 'Samosa Veg', 60.00, 'Short dish', 400, 1),
-(34, 'Samosa Saman', 80.00, 'Short dish', 400, 1),
-(35, 'Samosa Egg', 80.00, 'Short dish', 400, 1),
-(36, 'Samosa Chicken', 100.00, 'Short dish', 400, 1),
-(37, 'Rotti', 400.00, 'Short dish', 50, 1);
+INSERT INTO `production_product` (`p_id`, `product_name`, `current_price`, `product_category`, `batch_quantity`, `status`, `order_no`) VALUES
+(1, 'Slice Bread', 200.00, 'Bakery Items', 18, 1, 1),
+(2, 'L Bread', 130.00, 'Bakery Items', 20, 1, 2),
+(3, 'S Bread', 70.00, 'Bakery Items', 30, 1, 3),
+(4, 'Rost Bread', 60.00, 'Bakery Items', 120, 1, 4),
+(5, 'Bun', 60.00, 'Bakery Items', 220, 1, 5),
+(6, 'Curry Bun', 80.00, 'Bakery Items', 200, 1, 6),
+(7, 'Creem Bun', 80.00, 'Bakery Items', 110, 1, 7),
+(8, 'Jam Bun', 80.00, 'Bakery Items', 111, 1, 8),
+(9, 'S S Bun', 80.00, 'Bakery Items', 200, 1, 9),
+(10, 'Saman Bun', 80.00, 'Bakery Items', 200, 1, 10),
+(11, 'Egg Bun', 100.00, 'Bakery Items', 200, 1, 11),
+(12, 'Keels Bun', 80.00, 'Bakery Items', 200, 1, 12),
+(13, 'Roll Bun', 60.00, 'Bakery Items', 200, 1, 13),
+(14, 'Donad', 130.00, 'Bakery Items', 72, 1, 14),
+(15, 'T Vadai', 60.00, 'Bakery Items', 72, 1, 15),
+(16, 'Browni', 200.00, 'Bakery Items', 30, 1, 16),
+(17, 'Butter Cake', 1100.00, 'Bakery Items', 12, 1, 17),
+(18, 'Dates Cake', 1100.00, 'Bakery Items', 12, 1, 18),
+(19, 'Layer Cake', 1200.00, 'Bakery Items', 6, 1, 19),
+(20, 'Sponch', 60.00, 'Bakery Items', 72, 1, 20),
+(21, 'Rusk', 1000.00, 'Bakery Items', 65, 1, 21),
+(22, 'Baby Rusk', 1000.00, 'Bakery Items', 60, 1, 22),
+(23, 'Butter Rusk', 1000.00, 'Bakery Items', 20, 1, 23),
+(24, 'Ganakkatha L', 40.00, 'Bakery Items', 96, 1, 24),
+(25, 'Ganakkatha S', 20.00, 'Bakery Items', 192, 1, 25),
+(26, 'Patties Veg', 40.00, 'Short dish', 300, 1, 26),
+(27, 'Patties Saman', 60.00, 'Short dish', 300, 1, 27),
+(28, 'Patties Egg', 60.00, 'Short dish', 300, 1, 28),
+(29, 'Rolls Veg', 60.00, 'Short dish', 400, 1, 29),
+(30, 'Rolls Saman', 80.00, 'Short dish', 400, 1, 30),
+(31, 'Rolls Egg', 80.00, 'Short dish', 400, 1, 31),
+(32, 'Rolls Chicken', 100.00, 'Short dish', 400, 1, 32),
+(33, 'Samosa Veg', 60.00, 'Short dish', 400, 1, 33),
+(34, 'Samosa Saman', 80.00, 'Short dish', 400, 1, 34),
+(35, 'Samosa Egg', 80.00, 'Short dish', 400, 1, 35),
+(36, 'Samosa Chicken', 100.00, 'Short dish', 400, 1, 36),
+(37, 'Rotti', 400.00, 'Short dish', 50, 1, 37);
 
 -- --------------------------------------------------------
 
@@ -655,7 +894,7 @@ CREATE TABLE `user_license` (
 
 INSERT INTO `user_license` (`usr_id`, `customer`, `username`, `mobile_no`, `role_id`, `password`, `user_rights`, `account_status`, `i_name`, `nic`, `company`, `token`, `dr_token`, `last_log_in`, `last_token`, `material`, `accounts`, `store`, `admin`, `report`, `opd`, `ip`) VALUES
 (1, 0, '0740888501', '', 1, '$2y$10$nY48qthOlivF5rw0cWRZ2.PgsKMHmkFzKmaDjueMVuqcRBS8cu4X.', '', 1, 'Sys Admin', '', '', 'Expired', '3035', '2025-12-13 22:23:36', '255237bfc367574bf914f98b7066ac767c65bc461c3845639daba5d2d4b7b1fb', 0, 1, 1, 1, 0, 0, 0),
-(109, 0, '0770888501', '0770888501', 1, '$2y$10$fZMpMcCgrFXiQHb16FDVZurTdN.PEKCiuOU80Nyx79XSzbpPLrFfy', '', 1, 'Kiritharan', '893121', '', 'Expired', '6987', '2025-12-14 12:15:16', 'b86759baf8a9dd276468d9f18a7975f2466e51ce91b6ba8868c0501422d66094', 0, 1, 1, 1, 0, 0, 0);
+(109, 0, '0770888501', '0770888501', 1, '$2y$10$fZMpMcCgrFXiQHb16FDVZurTdN.PEKCiuOU80Nyx79XSzbpPLrFfy', '', 1, 'Kiritharan', '893121', '', 'Expired', '6987', '2025-12-15 10:08:19', 'f6210e457588df62f3ddab3958803c20bc822eb1bd33e77ef4257965752f0007', 0, 1, 1, 1, 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -968,11 +1207,146 @@ INSERT INTO `user_log` (`id`, `ben_id`, `usr_id`, `module`, `location`, `action`
 (254, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 14:02:27'),
 (255, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 14:13:18'),
 (256, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 14:13:31'),
-(257, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 14:20:42');
+(257, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 14:20:42'),
+(258, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-11', '2025-12-14 14:48:51'),
+(259, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-10', '2025-12-14 14:57:48'),
+(260, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-10', '2025-12-14 14:58:04'),
+(261, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 15:05:00'),
+(262, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-09', '2025-12-14 15:05:16'),
+(263, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 15:06:01'),
+(264, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 15:09:41'),
+(265, NULL, 109, 0, 2, 'Created', 'Overhead ID: 0', '2025-12-14 15:17:04'),
+(266, NULL, 109, 0, 2, 'Created', 'Overhead ID: 0', '2025-12-14 15:17:49'),
+(267, NULL, 109, 0, 2, 'Created', 'Overhead ID: 0', '2025-12-14 15:18:18'),
+(268, NULL, 109, 0, 2, 'Created', 'Overhead ID: 0', '2025-12-14 15:18:28'),
+(269, NULL, 109, 0, 2, 'Created', 'Overhead ID: 0', '2025-12-14 15:18:46'),
+(270, NULL, 109, 0, 2, 'Created', 'Overhead ID: 0', '2025-12-14 15:21:40'),
+(271, NULL, 109, 0, 2, 'Updated', 'Overhead ID: 3', '2025-12-14 15:27:08'),
+(272, NULL, 109, 0, 2, 'Updated', 'Overhead ID: 3', '2025-12-14 15:27:20'),
+(273, NULL, 109, 0, 2, 'Updated', 'Overhead ID: 1', '2025-12-14 15:27:30'),
+(274, NULL, 109, 0, 2, 'Created', 'Overhead ID: 7', '2025-12-14 15:27:40'),
+(275, NULL, 109, 0, 2, 'Updated', 'Overhead ID: 7', '2025-12-14 15:27:51'),
+(276, NULL, 109, 0, 2, 'Updated', 'Overhead ID: 7', '2025-12-14 15:30:12'),
+(277, NULL, 109, 0, 2, 'Updated', 'Overhead ID: 7', '2025-12-14 15:30:26'),
+(278, NULL, 109, 0, 2, 'Updated', 'Overhead ID: 2', '2025-12-14 15:30:54'),
+(279, NULL, 109, 0, 2, 'Updated', 'Overhead ID: 6', '2025-12-14 15:33:33'),
+(280, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-07', '2025-12-14 15:51:49'),
+(281, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 15:54:06'),
+(282, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 15:56:33'),
+(283, NULL, 109, 0, 2, 'Updated', 'Overhead ID: 1', '2025-12-14 16:07:40'),
+(284, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-06', '2025-12-14 16:23:06'),
+(285, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-06', '2025-12-14 16:23:16'),
+(286, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 16:44:06'),
+(287, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 16:45:13'),
+(288, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 17:25:04'),
+(289, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-14', '2025-12-14 17:26:25'),
+(290, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-13', '2025-12-14 19:12:09'),
+(291, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-13', '2025-12-14 19:12:31'),
+(292, NULL, 109, 0, 0, 'Login', 'Login from ::1', '2025-12-14 19:23:15'),
+(293, NULL, 109, 0, 2, 'Save', 'Daily production saved for 2025-12-13', '2025-12-14 19:35:06'),
+(294, NULL, 109, 0, 0, 'Login', 'Login from ::1', '2025-12-15 10:07:33'),
+(295, NULL, 109, 0, 0, 'Login', 'Login from ::1', '2025-12-15 10:08:19'),
+(296, NULL, 109, 0, 2, 'Created', 'Contact ID: 1 - Astra', '2025-12-15 11:34:45'),
+(297, NULL, 109, 0, 2, 'Updated', 'Contact ID: 1 - Astra', '2025-12-15 11:44:28'),
+(298, NULL, 109, 0, 2, 'Deactivated', 'Contact ID: 1', '2025-12-15 11:52:51'),
+(299, NULL, 109, 0, 2, 'Activated', 'Contact ID: 1', '2025-12-15 11:53:01'),
+(300, NULL, 109, 0, 2, 'Created', 'Cheque ID: 1 - 5025', '2025-12-15 12:53:53'),
+(301, NULL, 109, 0, 2, 'Created', 'Cheque ID: 2 - 2', '2025-12-15 12:56:15'),
+(302, NULL, 109, 0, 2, 'Created', 'Cheque ID: 3 - 5', '2025-12-15 12:59:30'),
+(303, NULL, 109, 0, 2, 'Created', 'Cheque ID: 4 - 15', '2025-12-15 13:11:38'),
+(304, NULL, 109, 0, 2, 'Created', 'Cheque ID: 5 - sar', '2025-12-15 13:11:58'),
+(305, NULL, 109, 0, 2, 'Created', 'Cheque ID: 6 - 1212', '2025-12-15 13:12:13'),
+(306, NULL, 109, 0, 2, 'Date Changed', 'Cheque ID: 3 to date: 2026-01-02', '2025-12-15 13:13:02'),
+(307, NULL, 109, 0, 2, 'Created', 'Contact ID: 2 - Me test payee', '2025-12-15 14:26:06'),
+(308, NULL, 109, 0, 2, 'Created', 'Cheque ID: 7 - 5000', '2025-12-15 14:30:47'),
+(309, NULL, 109, 0, 2, 'Updated', 'Cheque ID: 7 - 5000', '2025-12-15 14:31:02'),
+(310, NULL, 109, 0, 2, 'Date Changed', 'Cheque ID: 7 to date: 2025-12-14', '2025-12-15 14:47:48'),
+(311, NULL, 109, 0, 2, 'Date Changed', 'Cheque ID: 7 to date: 2026-12-14', '2025-12-15 14:48:01'),
+(312, NULL, 109, 0, 2, 'Updated', 'Cheque ID: 3 - 5', '2025-12-15 14:48:26'),
+(313, NULL, 109, 0, 2, 'Created', 'Customer ID: 1 - Department of labour', '2025-12-15 15:42:59'),
+(314, NULL, 109, 0, 2, 'Updated', 'Customer ID: 1 - Department of labour', '2025-12-15 15:43:40'),
+(315, NULL, 109, 0, 2, 'Created', 'Item ID: 38 - test', '2025-12-15 15:54:12'),
+(316, NULL, 109, 0, 2, 'Updated', 'Item ID: 38 - twet', '2025-12-15 15:56:52'),
+(317, NULL, 109, 0, 2, 'Created', 'Item ID: 39 - wqrwqr', '2025-12-15 15:57:07'),
+(318, NULL, 109, 0, 2, 'Created', 'Bill ID: 0', '2025-12-15 16:09:46'),
+(319, NULL, 109, 0, 2, 'Created', 'Bill ID: 0', '2025-12-15 16:11:14'),
+(320, NULL, 109, 0, 2, 'Created', 'Bill ID: 3', '2025-12-15 17:02:25'),
+(321, NULL, 109, 0, 2, 'Created', 'Bill ID: 4', '2025-12-15 17:02:57'),
+(322, NULL, 109, 0, 2, 'Updated', 'Bill ID: 4', '2025-12-15 17:05:35'),
+(323, NULL, 109, 0, 2, 'Created', 'Customer ID: 2 - Departent of  building', '2025-12-15 17:14:04'),
+(324, NULL, 109, 0, 2, 'Updated', 'Bill ID: 3', '2025-12-15 17:14:16'),
+(325, NULL, 109, 0, 2, 'Updated', 'Bill ID: 4', '2025-12-15 17:14:38'),
+(326, NULL, 109, 0, 2, 'Updated', 'Bill ID: 4', '2025-12-15 17:16:20'),
+(327, NULL, 109, 0, 2, 'Deactivated', 'Bill ID: 4', '2025-12-15 17:53:36'),
+(328, NULL, 109, 0, 2, 'Updated', 'Bill ID: 4', '2025-12-15 17:55:08'),
+(329, NULL, 109, 0, 2, 'Created', 'Bill ID: 5', '2025-12-15 18:00:00'),
+(330, NULL, 109, 0, 2, 'Deactivated', 'Bill ID: 4', '2025-12-15 18:02:55'),
+(331, NULL, 109, 0, 2, 'Created', 'Customer ID: 3 - test', '2025-12-15 18:19:46'),
+(332, NULL, 109, 0, 2, 'Created', 'Customer ID: 4 - kiri', '2025-12-15 18:22:47'),
+(333, NULL, 109, 0, 2, 'Payment', 'Bill ID: 5, Amount: 750, Mode: Cash', '2025-12-15 18:37:11'),
+(334, NULL, 109, 0, 2, 'Payment', 'Bill ID: 5, Amount: 1000, Mode: Cash', '2025-12-15 18:39:10'),
+(335, NULL, 109, 0, 2, 'Deactivated', 'Bill ID: 5', '2025-12-15 18:39:17'),
+(336, NULL, 109, 0, 2, 'Activated', 'Bill ID: 5', '2025-12-15 18:39:25'),
+(337, NULL, 109, 0, 2, 'Updated', 'Bill ID: 5', '2025-12-15 18:43:19'),
+(338, NULL, 109, 0, 2, 'Deactivated', 'Customer ID: 3', '2025-12-15 18:51:58'),
+(339, NULL, 109, 0, 2, 'Deactivated', 'Customer ID: 4', '2025-12-15 18:52:02'),
+(340, NULL, 109, 0, 2, 'Deactivated', 'Contact ID: 2', '2025-12-15 18:52:29'),
+(341, NULL, 109, 0, 2, 'Payment Delete', 'Payment ID: 1', '2025-12-15 18:53:27'),
+(342, NULL, 109, 0, 2, 'Payment Delete', 'Payment ID: 2', '2025-12-15 18:54:10'),
+(343, NULL, 109, 0, 2, 'Payment', 'Bill ID: 5, Amount: 5650, Mode: Cash', '2025-12-15 19:28:14'),
+(344, NULL, 109, 0, 2, 'Payment', 'Bill ID: 3, Amount: 40, Mode: Cash', '2025-12-15 19:28:23'),
+(345, NULL, 109, 0, 2, 'Payment', 'Bill ID: 3, Amount: 800, Mode: Cash', '2025-12-15 19:28:34'),
+(346, NULL, 109, 0, 2, 'Activated', 'Contact ID: 2', '2025-12-15 19:29:10'),
+(347, NULL, 109, 0, 2, 'Updated', 'Cheque ID: 7 - 5000', '2025-12-15 19:29:16'),
+(348, NULL, 109, 0, 2, 'Activated', 'Bill ID: 4', '2025-12-15 19:44:05'),
+(349, NULL, 109, 0, 2, 'Deactivated', 'Bill ID: 4', '2025-12-15 19:44:30'),
+(350, NULL, 109, 0, 2, 'Updated', 'Bill ID: 2', '2025-12-15 20:07:57'),
+(351, NULL, 109, 0, 2, 'Created', 'Customer ID: 5 - test23', '2025-12-15 20:33:33'),
+(352, NULL, 109, 0, 2, 'Created', 'Bill ID: 6', '2025-12-15 20:33:51'),
+(353, NULL, 109, 0, 2, 'Updated', 'Bill ID: 6', '2025-12-15 20:34:24'),
+(354, NULL, 109, 0, 2, 'Created', 'Cheque ID: 8 - 1212', '2025-12-15 20:35:02'),
+(355, NULL, 109, 0, 2, 'Deactivated', 'Item ID: 5', '2025-12-15 20:53:14'),
+(356, NULL, 109, 0, 2, 'Activated', 'Item ID: 5', '2025-12-15 21:00:43'),
+(357, NULL, 109, 0, 2, 'Payment', 'Bill ID: 6, Amount: 6840, Mode: Bank Deposit', '2025-12-15 21:22:24'),
+(358, NULL, 109, 0, 2, 'Deactivated', 'Cheque ID: 4', '2025-12-15 21:47:23'),
+(359, NULL, 109, 0, 2, 'Deactivated', 'Cheque ID: 7', '2025-12-15 21:49:39'),
+(360, NULL, 109, 0, 2, 'Deactivated', 'Cheque ID: 3', '2025-12-15 21:49:48'),
+(361, NULL, 109, 0, 2, 'Deactivated', 'Cheque ID: 8', '2025-12-15 21:49:56'),
+(362, NULL, 109, 0, 2, 'Payment Delete', 'Payment ID: 6', '2025-12-15 21:56:01');
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `bank_cheque_payment`
+--
+ALTER TABLE `bank_cheque_payment`
+  ADD PRIMARY KEY (`chq_id`);
+
+--
+-- Indexes for table `bank_contact`
+--
+ALTER TABLE `bank_contact`
+  ADD PRIMARY KEY (`contact_id`);
+
+--
+-- Indexes for table `bill_items`
+--
+ALTER TABLE `bill_items`
+  ADD PRIMARY KEY (`p_id`);
+
+--
+-- Indexes for table `bill_payment`
+--
+ALTER TABLE `bill_payment`
+  ADD PRIMARY KEY (`pay_id`);
+
+--
+-- Indexes for table `bill_summary`
+--
+ALTER TABLE `bill_summary`
+  ADD PRIMARY KEY (`bill_id`);
 
 --
 -- Indexes for table `client_registration`
@@ -997,6 +1371,12 @@ ALTER TABLE `letter_head`
 --
 ALTER TABLE `manage_activities`
   ADD PRIMARY KEY (`act_id`);
+
+--
+-- Indexes for table `manage_customers`
+--
+ALTER TABLE `manage_customers`
+  ADD PRIMARY KEY (`cus_id`);
 
 --
 -- Indexes for table `manage_user_group`
@@ -1026,6 +1406,12 @@ ALTER TABLE `production_material`
 -- Indexes for table `production_material_allocation`
 --
 ALTER TABLE `production_material_allocation`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `production_overhead`
+--
+ALTER TABLE `production_overhead`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -1063,6 +1449,36 @@ ALTER TABLE `user_log`
 --
 
 --
+-- AUTO_INCREMENT for table `bank_cheque_payment`
+--
+ALTER TABLE `bank_cheque_payment`
+  MODIFY `chq_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT for table `bank_contact`
+--
+ALTER TABLE `bank_contact`
+  MODIFY `contact_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `bill_items`
+--
+ALTER TABLE `bill_items`
+  MODIFY `p_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+
+--
+-- AUTO_INCREMENT for table `bill_payment`
+--
+ALTER TABLE `bill_payment`
+  MODIFY `pay_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `bill_summary`
+--
+ALTER TABLE `bill_summary`
+  MODIFY `bill_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
 -- AUTO_INCREMENT for table `client_registration`
 --
 ALTER TABLE `client_registration`
@@ -1087,6 +1503,12 @@ ALTER TABLE `manage_activities`
   MODIFY `act_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
+-- AUTO_INCREMENT for table `manage_customers`
+--
+ALTER TABLE `manage_customers`
+  MODIFY `cus_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
 -- AUTO_INCREMENT for table `manage_user_group`
 --
 ALTER TABLE `manage_user_group`
@@ -1096,13 +1518,13 @@ ALTER TABLE `manage_user_group`
 -- AUTO_INCREMENT for table `production_daily_material_usage`
 --
 ALTER TABLE `production_daily_material_usage`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `production_daily_production`
 --
 ALTER TABLE `production_daily_production`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `production_material`
@@ -1115,6 +1537,12 @@ ALTER TABLE `production_material`
 --
 ALTER TABLE `production_material_allocation`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=183;
+
+--
+-- AUTO_INCREMENT for table `production_overhead`
+--
+ALTER TABLE `production_overhead`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `production_product`
@@ -1144,7 +1572,7 @@ ALTER TABLE `user_location`
 -- AUTO_INCREMENT for table `user_log`
 --
 ALTER TABLE `user_log`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=258;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=363;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
