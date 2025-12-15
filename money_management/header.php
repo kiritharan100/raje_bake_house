@@ -268,6 +268,11 @@ $company_id = $_SESSION['customer'];
                             <i class="fa fa-home"></i><span> Dashboard</span>
                         </a>
                     </li>
+                    <li class="<?php $url='credit_sales.php'; if($url == $current_url){echo "active";}?> treeview">
+                        <a class="waves-effect waves-dark" href="<?php echo $url; ?>">
+                            <i class="fa fa-credit-card" aria-hidden="true"></i><span> Credit Sales</span>
+                        </a>
+                    </li>
 
                     <li
                         class="<?php $url='manage_cheque_payment.php'; if($url == $current_url){echo "active";}?> treeview">
@@ -282,6 +287,20 @@ $company_id = $_SESSION['customer'];
                             <i class="fa fa-user" aria-hidden="true"></i><span> Suppliers (Payee)</span>
                         </a>
                     </li>
+
+                    <li class="<?php $url='customer.php'; if($url == $current_url){echo "active";}?> treeview">
+                        <a class="waves-effect waves-dark" href="<?php echo $url; ?>">
+                            <i class="fa fa-user" aria-hidden="true"></i><span> Customers</span>
+                        </a>
+                    </li>
+
+                    <li class="<?php $url='bill_item.php'; if($url == $current_url){echo "active";}?> treeview">
+                        <a class="waves-effect waves-dark" href="<?php echo $url; ?>">
+                            <i class="fa fa-list" aria-hidden="true"></i><span> Billing Items</span>
+                        </a>
+                    </li>
+
+
 
 
 

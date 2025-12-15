@@ -6,7 +6,6 @@ header('Content-Type: application/json');
 
 $sql = "SELECT contact_id, contact_name, contact_number, status 
         FROM bank_contact 
-        WHERE status = 1
         ORDER BY contact_name ASC";
 
 $result = mysqli_query($con, $sql);

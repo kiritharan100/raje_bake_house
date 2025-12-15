@@ -130,7 +130,7 @@
     }
 
     function loadContacts() {
-        $.getJSON('ajax/contact_get.php', function (response) {
+        $.getJSON('ajax/contact_get_all.php', function (response) {
             if (!response.success) {
                 Swal.fire('Error', response.message || 'Unable to load contacts.', 'error');
                 return;

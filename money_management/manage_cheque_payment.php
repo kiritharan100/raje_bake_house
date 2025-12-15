@@ -151,7 +151,7 @@ $show_future = isset($_GET['show_future']) ? (int)$_GET['show_future'] : 1;
 <!-- Cheque Date Modal -->
 <div class="modal fade" id="chequeDateModal" tabindex="-1" role="dialog" aria-labelledby="chequeDateModalLabel"
     aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <form id="chequeDateForm" novalidate>
                 <div class="modal-header">
@@ -162,6 +162,11 @@ $show_future = isset($_GET['show_future']) ? (int)$_GET['show_future'] : 1;
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="dateChqId" name="chq_id">
+                    <div class="mb-2">
+                        <div><strong>Payee:</strong> <span id="cdPayee"></span></div>
+                        <div><strong>Cheque No:</strong> <span id="cdChequeNo"></span></div>
+                        <div><strong>Amount:</strong> <span id="cdAmount"></span></div>
+                    </div>
                     <div class="form-group">
                         <label for="newChequeDate">New Cheque Date</label>
                         <input type="date" class="form-control" id="newChequeDate" name="cheque_date" required>
@@ -189,25 +194,27 @@ $show_future = isset($_GET['show_future']) ? (int)$_GET['show_future'] : 1;
             </div>
             <div class="modal-body">
                 <div class="table-responsive">
-                    <table class="table table-bordered" id="summary-table">
-                        <thead>
-                            <tr>
-                                <th>Payee</th>
-                                <th width="90">Cheques</th>
-                                <th width="100">within 7 days</th>
-                                <th width="100">Total Payable</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                        <tfoot>
-                            <tr class="font-weight-bold">
-                                <td>Total</td>
-                                <td id="summary-total-count" class="text-right">0</td>
-                                <td id="summary-total-seven" class="text-right">0.00</td>
-                                <td id="summary-total-payable" class="text-right">0.00</td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                            <table class="table table-bordered" id="summary-table">
+                                <thead>
+                                    <tr>
+                                        <th>Payee</th>
+                                        <th width="90">Cheques</th>
+                                        <th width="100">Today</th>
+                                        <th width="100">within 7 days</th>
+                                        <th width="100">Total Payable</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                                <tfoot>
+                                    <tr class="font-weight-bold">
+                                        <td>Total</td>
+                                        <td id="summary-total-count" class="text-right">0</td>
+                                        <td id="summary-total-today" class="text-right">0.00</td>
+                                        <td id="summary-total-seven" class="text-right">0.00</td>
+                                        <td id="summary-total-payable" class="text-right">0.00</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
                 </div>
             </div>
         </div>
@@ -373,7 +380,7 @@ function loadContacts() {
             Swal.fire('Error', response.message || 'Unable to load contacts.', 'error');
             return;
         }
-        contactsCache = response.data || [];
+        contactsCache = (response.data || []).filter(c => c.status === '1' || c.status === 1);
         const select = $('#contactId');
         select.empty();
         select.append('<option value="">Select payee</option>');
@@ -472,7 +479,7 @@ $(document).ready(function() {
         const tr = $(this).closest('tr');
         $('#chqId').val(tr.data('id'));
         $('#chequeNo').val(tr.data('cheque_no'));
-        $('#contactId').val(tr.data('contact_id'));
+        $('#contactId').val(tr.data('contact_id')).trigger('change');
         $('#issueDate').val(tr.data('issue_date'));
         $('#chequeDate').val(tr.data('cheque_date'));
         $('#amount').val(tr.data('amount'));
@@ -487,6 +494,10 @@ $(document).ready(function() {
         const dateVal = $(this).data('date');
         $('#dateChqId').val(id);
         $('#newChequeDate').val(dateVal);
+        const tr = $(this).closest('tr');
+        $('#cdPayee').text(tr.find('.col-contact').text());
+        $('#cdChequeNo').text(tr.find('.col-cheque').text());
+        $('#cdAmount').text(tr.find('.col-amount').text());
         $('#chequeDateModal').modal('show');
     });
 
@@ -586,11 +597,13 @@ $(document).ready(function() {
                 const tr = $('<tr>');
                 tr.append(`<td>${row.contact_name}</td>`);
                 tr.append(`<td class="text-right">${row.cheque_count}</td>`);
+                tr.append(`<td class="text-right">${formatAmount(row.today_payable)}</td>`);
                 tr.append(`<td class="text-right">${formatAmount(row.payable_7_days)}</td>`);
                 tr.append(`<td class="text-right">${formatAmount(row.total_payable)}</td>`);
                 tbody.append(tr);
             });
             $('#summary-total-count').text(response.total.count);
+            $('#summary-total-today').text(formatAmount(response.total.today));
             $('#summary-total-seven').text(formatAmount(response.total.seven_days));
             $('#summary-total-payable').text(formatAmount(response.total.total_payable));
         }).fail(function() {

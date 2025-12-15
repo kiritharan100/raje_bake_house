@@ -4,11 +4,7 @@ require('../../auth.php');
 
 header('Content-Type: application/json');
 
-$sql = "SELECT contact_id, contact_name, contact_number, status 
-        FROM bank_contact 
-        WHERE status = 1
-        ORDER BY contact_name ASC";
-
+$sql = "SELECT cus_id, customer_name, contact_number, status FROM manage_customers WHERE status = 1 ORDER BY customer_name ASC";
 $result = mysqli_query($con, $sql);
 
 if (!$result) {
@@ -19,12 +15,12 @@ if (!$result) {
     exit;
 }
 
-$contacts = [];
+$rows = [];
 while ($row = mysqli_fetch_assoc($result)) {
-    $contacts[] = $row;
+    $rows[] = $row;
 }
 
 echo json_encode([
     'success' => true,
-    'data' => $contacts
+    'data' => $rows
 ]);
