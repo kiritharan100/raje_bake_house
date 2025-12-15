@@ -65,6 +65,7 @@ $company_id = $_SESSION['customer'];
     <!-- Favicon icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
     <link rel="shortcut icon" href="../assets/images/favicon.png" type="image/x-icon">
     <link rel="icon" href="../assets/images/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../assets/css/w3.css">
@@ -146,7 +147,7 @@ $company_id = $_SESSION['customer'];
                         <a href="#!" style='font-weight: 800;    font-size: 25px;' data-toggle="dropdown" role="button"
                             aria-haspopup="true" aria-expanded="false"
                             class="dropdown-toggle drop icon-circle drop-image">
-                            <span> <i class="fa fa-user" aria-hidden="true"></i> Bake House</span>
+                            <span> <i class="fa fa-user" aria-hidden="true"></i> Money Management</span>
                         </a>
 
                     </li>
@@ -267,32 +268,21 @@ $company_id = $_SESSION['customer'];
                             <i class="fa fa-home"></i><span> Dashboard</span>
                         </a>
                     </li>
-                    <li class="<?php $url='daily_production.php'; if($url == $current_url){echo "active";}?> treeview">
+
+                    <li
+                        class="<?php $url='manage_cheque_payment.php'; if($url == $current_url){echo "active";}?> treeview">
                         <a class="waves-effect waves-dark" href="<?php echo $url; ?>">
-                            <i class="fa fa-cube" aria-hidden="true"></i><span> Daily Production</span>
+                            <i class="fas fa-money-bill" aria-hidden="true"></i><span> Manage Cheque Payment</span>
                         </a>
                     </li>
 
 
-
-                    <li class="<?php $url='product_mange.php'; if($url == $current_url){echo "active";}?> treeview">
+                    <li class="<?php $url='contact.php'; if($url == $current_url){echo "active";}?> treeview">
                         <a class="waves-effect waves-dark" href="<?php echo $url; ?>">
-                            <i class="fa fa-cube" aria-hidden="true"></i><span> Products</span>
+                            <i class="fa fa-user" aria-hidden="true"></i><span> Suppliers (Payee)</span>
                         </a>
                     </li>
 
-
-                    <li class="<?php $url='manage_material.php'; if($url == $current_url){echo "active";}?> treeview">
-                        <a class="waves-effect waves-dark" href="<?php echo $url; ?>">
-                            <i class="fa fa-archive" aria-hidden="true"></i><span> Material</span>
-                        </a>
-                    </li>
-
-                    <li class="<?php $url='manage_overhead.php'; if($url == $current_url){echo "active";}?> treeview">
-                        <a class="waves-effect waves-dark" href="<?php echo $url; ?>">
-                            <i class="fa fa-archive" aria-hidden="true"></i><span> Production Overhead </span>
-                        </a>
-                    </li>
 
 
 

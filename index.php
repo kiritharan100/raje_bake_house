@@ -52,8 +52,16 @@
 
                         <a href='production'>
                             <div class="col-sm-3 col-xs-12 waves-effect waves-light">
-                                <div class="grid-material bg-danger" style="opacity: .9;"><img src='img/ds.png'
-                                        width='100px;'><br> Bakery</div>
+                                <div class="grid-material bg-danger" style="opacity: .9;"><img src='img/bake.png'
+                                        width='100px;'><br> Production & Sales</div>
+                            </div>
+                        </a>
+
+
+                        <a href='money_management'>
+                            <div class="col-sm-3 col-xs-12 waves-effect waves-light">
+                                <div class="grid-material bg-danger" style="opacity: .9;"><img src='img/money.png'
+                                        width='100px;'><br> Money Management</div>
                             </div>
                         </a>
 
